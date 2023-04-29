@@ -30,6 +30,7 @@
 #include "software/geom/vector.h"
 #include "software/networking/threaded_proto_udp_listener.hpp"
 #include "software/networking/threaded_proto_udp_sender.hpp"
+#include "software/networking/proto_radio_sender.hpp"
 #include "software/uart/boost_uart_communication.h"
 #include "software/world/field.h"
 #include "software/world/robot.h"
@@ -66,6 +67,16 @@ void declareThreadedProtoUdpListener(py::module& m, std::string name)
                                               py::buffer_protocol(), py::dynamic_attr())
         .def(
             py::init<std::string, unsigned short, const std::function<void(T)>&, bool>());
+}
+
+template <typename T>
+void declareProtoRadioSender(py::module& m, std::string name)
+{
+    using Class = ProtoRadioSender<T>;
+    std::string pyclass_name = name + "ProtoRadioSender";
+    py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(),
+                                              py::buffer_protocol(), py::dynamic_attr())
+            .def(py::init<uint8_t, uint8_t, uint8_t>());
 }
 
 /**
@@ -331,6 +342,8 @@ PYBIND11_MODULE(python_bindings, m)
     declareThreadedProtoUdpSender<TbotsProto::World>(m, "World");
     declareThreadedProtoUdpSender<TbotsProto::RobotStatus>(m, "RobotStatus");
     declareThreadedProtoUdpSender<TbotsProto::PrimitiveSet>(m, "PrimitiveSet");
+    declareProtoRadioSender<TbotsProto::World>(m, "World");
+    declareProtoRadioSender<TbotsProto::PrimitiveSet>(m, "PrimitiveSet");
 
     // Estop Reader
     py::class_<ThreadedEstopReader, std::unique_ptr<ThreadedEstopReader>>(

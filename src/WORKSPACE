@@ -36,6 +36,22 @@ http_archive(
 )
 
 http_archive(
+    name = "RF24",
+    build_file = "@//extlibs:RF24.BUILD",
+    sha256 = "0fac2815d0f08e1ff2c0a903741f537609c27dde88b0347733be7b60b035ce85",
+    strip_prefix = "RF24-1.4.6",
+    url = "https://github.com/nRF24/RF24/archive/refs/tags/v1.4.6.tar.gz",
+)
+
+http_archive(
+    name = "RF24Network",
+    build_file = "@//extlibs:RF24Network.BUILD",
+    sha256 = "48e2f0402ccbc21c14c9a39255de19ddfbc974ef37fe6a567d572ed92dee0eb0",
+    strip_prefix = "RF24Network-1.0.17",
+    url = "https://github.com/nRF24/RF24Network/archive/refs/tags/v1.0.17.tar.gz",
+)
+
+http_archive(
     name = "cpp_redis",
     sha256 = "12a6fc86ba4ca3d4537a3eee82c094f385b8e03e283c664c976f16d421f17f7d",
     strip_prefix = "cpp_redis-fc2c43fa07e45e1ef0f77cbda6a240e7890ae5aa",

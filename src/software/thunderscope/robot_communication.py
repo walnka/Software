@@ -213,6 +213,8 @@ class RobotCommunication(object):
             self.multicast_channel + "%" + self.interface, VISION_PORT, True
         )
 
+        self.send_world = WorldProtoRadioSender(0, 1, 00)
+
         self.robots_connected_to_fullsystem = {
             robot_id for robot_id in range(MAX_ROBOT_IDS_PER_SIDE)
         }

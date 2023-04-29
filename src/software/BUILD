@@ -75,6 +75,7 @@ pybind_library(
         "//software/geom:segment",
         "//software/geom:vector",
         "//software/geom/algorithms",
+        "//software/networking:proto_radio_sender",
         "//software/networking:threaded_proto_udp_listener",
         "//software/networking:threaded_proto_udp_sender",
         "//software/uart:boost_uart_communication",

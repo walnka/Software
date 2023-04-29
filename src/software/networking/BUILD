@@ -1,6 +1,17 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "proto_radio_sender",
+    hdrs = [
+        "proto_radio_sender.hpp",
+    ],
+    deps = [
+        "@RF24",
+        "@RF24Network",
+    ],
+)
+
+cc_library(
     name = "proto_udp_client",
     hdrs = [
         "proto_udp_client.hpp",
