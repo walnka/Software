@@ -48,4 +48,8 @@ void ProtoRadioSender<SendProtoT>::sendProto(const SendProtoT& message) {
     RF24NetworkHeader header;
     bool ok = network.multicast(header, message, sizeof(message), multicast_level);
     // Potentially add delays
+    if (!ok)
+    {
+        LOG(INFO) << "ProtoRadioSender sendProto failed";
+    }
 }
