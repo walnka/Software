@@ -29,3 +29,15 @@ cc_library(
         "@boost//:filesystem",
     ],
 )
+
+cc_library(
+    name = "radio",
+    srcs = ["radio.cpp"],
+    hdrs = ["radio.h"],
+    deps = [
+        "//proto:tbots_cc_proto",
+        "//software/networking:threaded_proto_radio_listener",
+        "//software/jetson_nano/services/network:proto_tracker",
+        "//software/logger",
+    ]
+)

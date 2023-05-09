@@ -51,6 +51,6 @@ void ProtoRadioListener<ReceiveProtoT>::receive() {
         RF24NetworkHeader header;
         ReceiveProtoT payload;
         network.read(header, &payload, sizeof(payload));
-        receive_callback(payload)
+        receive_callback(payload);
     }
 }

@@ -12,6 +12,17 @@ cc_library(
 )
 
 cc_library(
+    name = "proto_radio_listener",
+    hdrs = [
+        "proto_radio_listener.hpp",
+    ],
+    deps = [
+         "@RF24",
+        "@RF24Network",
+    ],
+)
+
+cc_library(
     name = "proto_udp_client",
     hdrs = [
         "proto_udp_client.hpp",
@@ -128,6 +139,18 @@ cc_library(
     deps = [
         ":proto_unix_sender",
         "@boost//:asio",
+    ],
+)
+
+cc_library(
+    name = "threaded_proto_radio_listener",
+    hdrs = [
+        "threaded_proto_radio_listener.hpp"
+    ],
+    deps = [
+        ":proto_radio_listener",
+        "@boost//:asio",
+        "//shared:constants",
     ],
 )
 

@@ -1,8 +1,10 @@
 #pragma once
 
-#include <thread>
 #include "software/networking/proto_radio_listener.hpp"
 #include "shared/constants.h"
+
+#include <thread>
+#include <unistd.h>
 
 template <class ReceiveProtoT>
 class ThreadedProtoRadioListener
@@ -23,7 +25,7 @@ private:
 
 template <class ReceiveProtoT>
 ThreadedProtoRadioListener<ReceiveProtoT>::ThreadedProtoRadioListener(uint8_t channel, uint8_t multicast_level,
-                                                                      uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) {}
+                                                                      uint8_t address, std::function<void(ReceiveProtoT)> receive_callback)
 {
     // start the thread to run the io_service in the background
     radio_listener_thread = std::thread([this]() {
