@@ -32,7 +32,8 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
     network.begin(address);
     // Close unnecessary pipes
     // We only need the pipe opened for multicast listening
-    for(int i = 0; i < 6; i++) {
+    for(int i = 0; i < 6; i++)
+    {
         radio.closeReadingPipe(i);
     }
 
@@ -47,7 +48,8 @@ ProtoRadioListener<ReceiveProtoT>::~ProtoRadioListener() {
 template<class ReceiveProtoT>
 void ProtoRadioListener<ReceiveProtoT>::receive() {
     network.update();
-    while (network.available()) {
+    while (network.available())
+    {
         RF24NetworkHeader header;
         ReceiveProtoT payload;
         network.read(header, &payload, sizeof(payload));

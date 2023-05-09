@@ -25,7 +25,8 @@ private:
 
 template <class ReceiveProtoT>
 ThreadedProtoRadioListener<ReceiveProtoT>::ThreadedProtoRadioListener(uint8_t channel, uint8_t multicast_level,
-                                                                      uint8_t address, std::function<void(ReceiveProtoT)> receive_callback)
+                                                                      uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
+    radio_listener(channel, multicast_level, address, receive_callback)
 {
     // start the thread to run the io_service in the background
     radio_listener_thread = std::thread([this]() {
