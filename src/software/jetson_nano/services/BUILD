@@ -37,6 +37,7 @@ cc_library(
     deps = [
         "//proto:tbots_cc_proto",
         "//software/networking:threaded_proto_radio_listener",
+        "//software/networking:proto_radio_sender",
         "//software/jetson_nano/services/network:proto_tracker",
         "//software/logger",
     ]

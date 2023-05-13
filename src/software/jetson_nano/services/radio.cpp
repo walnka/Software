@@ -1,9 +1,17 @@
 #include "software/jetson_nano/services/radio.h"
 
-RadioService::RadioService()
-    : 
+RadioService::RadioService(uint8_t channel, uint8_t multicast_level, uint8_t address, unsigned short world_listener_port,
+                           unsigned short primitive_listener_port, unsigned short robot_status_sender_port)
+        :
 {
     // TODO: construct listeners and packet trackers
+    sender = std::make_unique<ProtoRadioSender<TbotsProto::RobotStatus>>(channel, multicast_level, address);
+    world_listener = std::make_unique<ThreadedProtoRadioListener<TbotsProto::World>>(
+            channel, multicast_level, address, boost::bind(&RadioService::worldCallback, this, _1)
+            );
+    primitive_set_listener = std::make_unique<ThreadedProtoRadioListener<TbotsProto::PrimitiveSet>>(
+            channel, multicast_level, address, boost::bind(&RadioService::primitiveSetCallback, this, _1)
+    );
 }
 
 void RadioService::primitiveSetCallback(TbotsProto::PrimitiveSet input)
