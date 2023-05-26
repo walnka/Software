@@ -46,6 +46,8 @@ Thunderloop::Thunderloop(const RobotConstants_t& robot_constants, const int loop
     LOG(INFO)
         << "THUNDERLOOP: Network Service initialized! Next initializing Motor Service";
 
+    radio_service_ = std::make_unique<RadioService>()
+
     motor_service_ = std::make_unique<MotorService>(robot_constants, loop_hz);
     LOG(INFO)
         << "THUNDERLOOP: Motor Service initialized! Next initializing Power Service";

@@ -17,7 +17,7 @@ cc_library(
         "proto_radio_listener.hpp",
     ],
     deps = [
-         "@RF24",
+        "@RF24",
         "@RF24Network",
     ],
 )
@@ -145,10 +145,22 @@ cc_library(
 cc_library(
     name = "threaded_proto_radio_listener",
     hdrs = [
-        "threaded_proto_radio_listener.hpp"
+        "threaded_proto_radio_listener.hpp",
     ],
     deps = [
         ":proto_radio_listener",
+        "@boost//:asio",
+        "//shared:constants",
+    ],
+)
+
+cc_library(
+    name = "threaded_proto_radio_sender",
+    hdrs = [
+        "threaded_proto_radio_sender.hpp",
+    ],
+    deps = [
+        ":proto_radio_sender",
         "@boost//:asio",
         "//shared:constants",
     ],

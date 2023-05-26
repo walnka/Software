@@ -28,7 +28,7 @@ private:
     std::mutex primitive_set_mutex;
     std::mutex world_mutex;
 
-    std::unique_ptr<ProtoRadioSender<TbotsProto::RobotStatus>> sender
+    std::unique_ptr<ProtoRadioSender<TbotsProto::RobotStatus>> sender;
 
     // radio receiver
     std::unique_ptr<ThreadedProtoRadioListener<TbotsProto::World>> world_listener;

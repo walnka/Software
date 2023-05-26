@@ -2,7 +2,8 @@
 
 RadioService::RadioService(uint8_t channel, uint8_t multicast_level, uint8_t address, unsigned short world_listener_port,
                            unsigned short primitive_listener_port, unsigned short robot_status_sender_port)
-        :
+        : primitive_set_tracker(ProtoTracker("primitive set")),
+          world_tracker(ProtoTracker("world"))
 {
     // TODO: construct listeners and packet trackers
     sender = std::make_unique<ProtoRadioSender<TbotsProto::RobotStatus>>(channel, multicast_level, address);

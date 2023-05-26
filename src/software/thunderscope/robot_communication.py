@@ -83,7 +83,7 @@ class RobotCommunication(object):
         if not self.disable_estop:
             while True:
                 self.current_proto_unix_io.send_proto(
-                    EstopState, EstopState(is_playing=self.estop_reader.isEstopPlay())
+                    EstopState, EstopState(udpsenderis_playing=self.estop_reader.isEstopPlay())
                 )
                 time.sleep(0.1)
 
@@ -213,6 +213,7 @@ class RobotCommunication(object):
             self.multicast_channel + "%" + self.interface, VISION_PORT, True
         )
 
+        # TODO: Test Radio
         self.send_world = WorldProtoRadioSender(0, 1, 00)
 
         self.robots_connected_to_fullsystem = {

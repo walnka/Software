@@ -19,6 +19,9 @@ private:
     RF24Network network;
 
     uint8_t multicast_level;
+
+    // Buffer to hold serialized protobuf data
+    std::string data_buffer;
 };
 
 template <class SendProtoT>
@@ -43,10 +46,11 @@ ProtoRadioSender<SendProtoT>::~ProtoRadioSender() {
 template<class SendProtoT>
 void ProtoRadioSender<SendProtoT>::sendProto(const SendProtoT& message) {
     // TODO: catch cant send spi message runtime error
+    message.SerializeToString(&data_buffer);
     network.update();
     // multicast sets the receiving node to a multicast address for the header so we can just default construct it
     RF24NetworkHeader header;
-    bool ok = network.multicast(header, message, sizeof(message), multicast_level);
+    bool ok = network.multicast(header, data_buffer.data(), data_buffer.length(), multicast_level);
     // Potentially add delays
     if (!ok)
     {
