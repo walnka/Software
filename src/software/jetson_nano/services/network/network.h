@@ -15,7 +15,8 @@ class NetworkService
 {
    public:
     /**
-     * Service that communicates with our AI
+     * Service that communicates with our AI#include "software/networking/threaded_proto_radio_sender.hpp"
+
      * Opens all the required ports and maintains them until destroyed.
      *
      * @param ip_address The IP Address the service should connect to
@@ -50,9 +51,9 @@ class NetworkService
     std::mutex world_mutex;
 
     std::unique_ptr<ThreadedProtoUdpSender<TbotsProto::RobotStatus>> sender;
-    std::unique_ptr<ThreadedProtoUdpListener<TbotsProto::PrimitiveSet>>
-        listener_primitive_set;
-    std::unique_ptr<ThreadedProtoUdpListener<TbotsProto::World>> listener_world;
+//    std::unique_ptr<ThreadedProtoUdpListener<TbotsProto::PrimitiveSet>>
+//        listener_primitive_set;
+//    std::unique_ptr<ThreadedProtoUdpListener<TbotsProto::World>> listener_world;
 
 
     // Functions to callback primitiveSet and world and stores them in a variable

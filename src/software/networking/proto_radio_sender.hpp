@@ -3,6 +3,7 @@
 #include <RF24/RF24.h>
 #include <RF24Network/RF24Network.h>
 #include <cstdint>
+#include "software/logger/logger.h"
 
 template <class SendProtoT>
 class ProtoRadioSender

@@ -9,13 +9,13 @@ NetworkService::NetworkService(const std::string& ip_address,
 {
     sender = std::make_unique<ThreadedProtoUdpSender<TbotsProto::RobotStatus>>(
         ip_address, robot_status_sender_port, multicast);
-    listener_primitive_set =
-        std::make_unique<ThreadedProtoUdpListener<TbotsProto::PrimitiveSet>>(
-            ip_address, primitive_listener_port,
-            boost::bind(&NetworkService::primitiveSetCallback, this, _1), multicast);
-    listener_world = std::make_unique<ThreadedProtoUdpListener<TbotsProto::World>>(
-        ip_address, world_listener_port,
-        boost::bind(&NetworkService::worldCallback, this, _1), multicast);
+//    listener_primitive_set =
+//        std::make_unique<ThreadedProtoUdpListener<TbotsProto::PrimitiveSet>>(
+//            ip_address, primitive_listener_port,
+//            boost::bind(&NetworkService::primitiveSetCallback, this, _1), multicast);
+//    listener_world = std::make_unique<ThreadedProtoUdpListener<TbotsProto::World>>(
+//        ip_address, world_listener_port,
+//        boost::bind(&NetworkService::worldCallback, this, _1), multicast);
 }
 
 std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World> NetworkService::poll(
@@ -29,39 +29,39 @@ std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World> NetworkService::poll(
                                                                    world_msg};
 }
 
-void NetworkService::primitiveSetCallback(TbotsProto::PrimitiveSet input)
-{
-    std::scoped_lock<std::mutex> lock(primitive_set_mutex);
-    const uint64_t seq_num = input.sequence_number();
-
-    primitive_tracker.send(seq_num);
-    if (primitive_tracker.isLastValid())
-    {
-        primitive_set_msg = input;
-    }
-
-    float primitive_set_loss_rate = primitive_tracker.getLossRate();
-    if (primitive_set_loss_rate > PROTO_LOSS_WARNING_THRESHOLD)
-    {
-        LOG(WARNING) << "Primitive set loss rate is " << primitive_set_loss_rate * 100
-                     << "%";
-    }
-}
-
-void NetworkService::worldCallback(TbotsProto::World input)
-{
-    std::scoped_lock<std::mutex> lock(world_mutex);
-    const uint64_t seq_num = input.sequence_number();
-
-    world_tracker.send(seq_num);
-    if (world_tracker.isLastValid())
-    {
-        world_msg = input;
-    }
-
-    float world_loss_rate = world_tracker.getLossRate();
-    if (world_loss_rate > PROTO_LOSS_WARNING_THRESHOLD)
-    {
-        LOG(WARNING) << "World loss rate is " << world_loss_rate * 100 << "%";
-    }
-}
+//void NetworkService::primitiveSetCallback(TbotsProto::PrimitiveSet input)
+//{
+//    std::scoped_lock<std::mutex> lock(primitive_set_mutex);
+//    const uint64_t seq_num = input.sequence_number();
+//
+//    primitive_tracker.send(seq_num);
+//    if (primitive_tracker.isLastValid())
+//    {
+//        primitive_set_msg = input;
+//    }
+//
+//    float primitive_set_loss_rate = primitive_tracker.getLossRate();
+//    if (primitive_set_loss_rate > PROTO_LOSS_WARNING_THRESHOLD)
+//    {
+//        LOG(WARNING) << "Primitive set loss rate is " << primitive_set_loss_rate * 100
+//                     << "%";
+//    }
+//}
+//
+//void NetworkService::worldCallback(TbotsProto::World input)
+//{
+//    std::scoped_lock<std::mutex> lock(world_mutex);
+//    const uint64_t seq_num = input.sequence_number();
+//
+//    world_tracker.send(seq_num);
+//    if (world_tracker.isLastValid())
+//    {
+//        world_msg = input;
+//    }
+//
+//    float world_loss_rate = world_tracker.getLossRate();
+//    if (world_loss_rate > PROTO_LOSS_WARNING_THRESHOLD)
+//    {
+//        LOG(WARNING) << "World loss rate is " << world_loss_rate * 100 << "%";
+//    }
+//}

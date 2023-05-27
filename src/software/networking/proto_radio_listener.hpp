@@ -32,7 +32,7 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
     network.begin(address);
     // Close unnecessary pipes
     // We only need the pipe opened for multicast listening
-    for(int i = 0; i < 6; i++)
+    for(uint8_t i = 0; i < 6; i++)
     {
         radio.closeReadingPipe(i);
     }
