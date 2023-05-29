@@ -13,7 +13,6 @@ class RadioService
 {
 public:
     RadioService(uint8_t channel, uint8_t multicast_level, uint8_t address);
-    ~RadioService();
     std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World> poll();
 private:
     void worldCallback(TbotsProto::World input);
