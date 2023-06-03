@@ -14,6 +14,13 @@ RadioService::RadioService(uint8_t channel, uint8_t multicast_level, uint8_t add
     );
 }
 
+std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World> RadioService::poll()
+{
+    std::scoped_lock lock{primitive_set_mutex, world_mutex};
+    return std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World>{primitive_set_msg,
+                                                                   world_msg};
+}
+
 void RadioService::primitiveSetCallback(TbotsProto::PrimitiveSet input)
 {
     std::scoped_lock<std::mutex> lock(primitive_set_mutex);

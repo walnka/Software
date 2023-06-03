@@ -24,7 +24,8 @@ std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World> NetworkService::poll(
     std::scoped_lock lock{primitive_set_mutex, world_mutex};
     TbotsProto::RobotStatus new_status = robot_status;
     new_status.set_last_handled_primitive_set(primitive_set_msg.sequence_number());
-    sender->sendProto(robot_status);
+    //TODO: changed robot_status to new_status
+    sender->sendProto(new_status);
     return std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World>{primitive_set_msg,
                                                                    world_msg};
 }
