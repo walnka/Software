@@ -7,6 +7,8 @@ from proto.import_all_protos import *
 from pyqtgraph.Qt import QtCore
 import threading
 import time
+from proto.tbots_software_msgs_pb2 import World
+from proto.tbots_software_msgs_pb2 import PrimitiveSet
 
 
 class RobotCommunication(object):
@@ -104,7 +106,10 @@ class RobotCommunication(object):
                 )
             ):
                 # send the world proto
-                self.send_world.send_proto(world)
+                # self.send_world.send_proto(world)
+                # TODO: Send blank world for testing
+                test_world = World()
+                self.send_world.send_proto(test_world)
 
     def run_primitive_set(self):
         """Forward PrimitiveSet protos from fullsystem to the robots.
@@ -166,15 +171,18 @@ class RobotCommunication(object):
 
             self.sequence_number += 1
 
-            if (
-                not self.disable_estop
-                and self.estop_reader.isEstopPlay()
-                and (
-                    self.robots_connected_to_fullsystem
-                    or self.robots_connected_to_manual
-                )
-            ):
-                self.send_primitive_set.send_proto(primitive_set)
+            # if (
+            #     not self.disable_estop
+            #     and self.estop_reader.isEstopPlay()
+            #     and (
+            #         self.robots_connected_to_fullsystem
+            #         or self.robots_connected_to_manual
+            #     )
+            # ):
+                # self.send_primitive_set.send_proto(primitive_set)
+                # TODO: Send blank primitive set for testing
+                # test_primitive_set = PrimitiveSet()
+                # self.send_primitive_set.send_proto(test_primitive_set)
 
             # sleep if not running fullsystem
             if not self.robots_connected_to_fullsystem:

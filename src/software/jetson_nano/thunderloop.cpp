@@ -81,7 +81,7 @@ Thunderloop::~Thunderloop() {}
     struct timespec iteration_time;
     struct timespec last_primitive_received_time;
     struct timespec last_world_recieved_time;
-    struct timespec current_time;
+//    struct timespec current_time;
     struct timespec last_chipper_fired;
     struct timespec last_kicker_fired;
 
@@ -103,7 +103,7 @@ Thunderloop::~Thunderloop() {}
     clock_gettime(CLOCK_MONOTONIC, &last_chipper_fired);
     clock_gettime(CLOCK_MONOTONIC, &last_kicker_fired);
 
-    double loop_duration_seconds = 0.0;
+//    double loop_duration_seconds = 0.0;
 
     for (;;)
     {
@@ -116,12 +116,10 @@ Thunderloop::~Thunderloop() {}
             ScopedTimespecTimer iteration_timer(&iteration_time);
 
             // TODO: Test radio
-            // Network Service: receive newest world, primitives and set out the last
-            // robot status
             {
                 ScopedTimespecTimer timer(&poll_time);
                 auto result       = radio_service_->poll();
-                new_primitive_set = std::get<0>(result);
+//                new_primitive_set = std::get<0>(result);
                 new_world         = std::get<1>(result);
             }
 
@@ -154,30 +152,30 @@ Thunderloop::~Thunderloop() {}
 //            network_status_.set_ms_since_last_primitive_received(
 //                getMilliseconds(time_since_last_primitive_received));
 //
-            // If the primitive msg is new, update the internal buffer
-            // and start the new primitive.
-            if (new_primitive_set.time_sent().epoch_timestamp_seconds() >
-                primitive_set_.time_sent().epoch_timestamp_seconds())
-            {
-                // Save new primitive set
-                primitive_set_ = new_primitive_set;
-                LOG(WARNING) << "Primitive Set Received";
-
-                // Update primitive executor's primitive set
-                {
-                    clock_gettime(CLOCK_MONOTONIC, &last_primitive_received_time);
-
-                    // Start new primitive
-                    {
-                        ScopedTimespecTimer timer(&poll_time);
-                        primitive_executor_.updatePrimitiveSet(primitive_set_);
-                    }
-
-                    thunderloop_status_.set_primitive_executor_start_time_ms(
-                        getMilliseconds(poll_time));
-                }
-            }
-
+//            // If the primitive msg is new, update the internal buffer
+//            // and start the new primitive.
+//            if (new_primitive_set.time_sent().epoch_timestamp_seconds() >
+//                primitive_set_.time_sent().epoch_timestamp_seconds())
+//            {
+//                // Save new primitive set
+//                primitive_set_ = new_primitive_set;
+//                LOG(WARNING) << primitive_set_;
+//
+//                // Update primitive executor's primitive set
+//                {
+//                    clock_gettime(CLOCK_MONOTONIC, &last_primitive_received_time);
+//
+//                    // Start new primitive
+//                    {
+//                        ScopedTimespecTimer timer(&poll_time);
+//                        priloop_duramitive_executor_.updatePrimitiveSet(primitive_set_);
+//                    }
+//
+//                    thunderloop_status_.set_primitive_executor_start_time_ms(
+//                        getMilliseconds(poll_time));
+//                }
+//            }
+//
 //            struct timespec time_since_last_vision_received;
 //            clock_gettime(CLOCK_MONOTONIC, &current_time);
 //            ScopedTimespecTimer::timespecDiff(&current_time, &last_world_recieved_time,
@@ -192,7 +190,7 @@ Thunderloop::~Thunderloop() {}
                 clock_gettime(CLOCK_MONOTONIC, &last_world_recieved_time);
                 primitive_executor_.updateWorld(new_world);
                 world_ = new_world;
-                LOG(WARNING) << "World Received";
+                LOG(WARNING) << world_;
             }
 //
 //            if (motor_status_.has_value())
@@ -314,9 +312,9 @@ Thunderloop::~Thunderloop() {}
         thunderloop_status_.set_iteration_time_ms(loop_duration_ns /
                                                   NANOSECONDS_PER_MILLISECOND);
 
-        // Make sure the iteration can fit inside the period of the loop
-        loop_duration_seconds =
-            static_cast<double>(loop_duration_ns) * SECONDS_PER_NANOSECOND;
+//        // Make sure the iteration can fit inside the period of the loop
+//        loop_duration_seconds =
+//            static_cast<double>(loop_duration_ns) * SECONDS_PER_NANOSECOND;
 
         // Calculate next shot taking into account how long this iteration took
         next_shot.tv_nsec += interval - static_cast<long int>(loop_duration_ns);
