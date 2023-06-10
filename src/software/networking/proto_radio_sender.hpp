@@ -14,8 +14,10 @@ public:
     virtual  ~ProtoRadioSender();
     void sendProto(const SendProtoT& message);
 private:
-    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
-    static const uint8_t csn_pin = 1; // SPI Chip Select pin
+//    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
+//    static const uint8_t csn_pin = 1; // SPI Chip Select pin
+    static const uint8_t ce_pin = 2; // SPI Chip Enable pin
+    static const uint8_t csn_pin = 10; // SPI Chip Select pin
     RF24 radio;
     RF24Network network;
 
@@ -28,6 +30,15 @@ private:
 template <class SendProtoT>
 ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
                                               uint8_t address) : radio(RF24(ce_pin, csn_pin)), network(RF24Network(radio)), multicast_level(multicast_level)  {
+    LOG(INFO) << "Initializing Radio Sender";
+    try {
+        if (!radio.begin()) {
+            LOG(INFO) << "Radio hardware not responding!";
+        }
+    }
+    catch (...) {
+        LOG(INFO) << "proto_radio_sender.hpp: radio.begin() threw exception";
+    }
     radio.setChannel(channel);
     network.begin(address);
     // Close unnecessary pipes
@@ -37,6 +48,7 @@ ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicas
     }
 
     network.multicastLevel(multicast_level);
+    LOG(INFO) << "Radio Sender Initialized";
 };
 
 template<class SendProtoT>

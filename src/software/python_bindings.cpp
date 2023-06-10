@@ -91,14 +91,14 @@ void declareThreadedProtoRadioSender(py::module& m, std::string name)
     .def("send_proto", &Class::sendProto);
 }
 
-template <typename T>
-void declareThreadedProtoRadioListener(py::module& m, std::string name)
-{
-    using Class = ThreadedProtoRadioListener<T>;
-    std::string pyclass_name = name + "ProtoRadioListener";
-    py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-    .def(py::init<uint8_t, uint8_t, uint8_t, const std::function<void(T)>&>());
-}
+//template <typename T>
+//void declareThreadedProtoRadioListener(py::module& m, std::string name)
+//{
+//    using Class = ThreadedProtoRadioListener<T>;
+//    std::string pyclass_name = name + "ProtoRadioListener";
+//    py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
+//    .def(py::init<uint8_t, uint8_t, uint8_t, const std::function<void(T)>&>());
+//}
 
 /**
  * Create a new threaded e-stop reader

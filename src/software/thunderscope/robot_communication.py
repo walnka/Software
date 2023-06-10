@@ -7,8 +7,8 @@ from proto.import_all_protos import *
 from pyqtgraph.Qt import QtCore
 import threading
 import time
-from proto.tbots_software_msgs_pb2 import World
-from proto.tbots_software_msgs_pb2 import PrimitiveSet
+# from proto.tbots_sofrun_worldtware_msgs_pb2 import World
+# from proto.tbots_software_msgs_pb2 import PrimitiveSet
 
 
 class RobotCommunication(object):
@@ -99,7 +99,7 @@ class RobotCommunication(object):
             world = self.world_buffer.get(block=True, return_cached=False)
             if (
                 not self.disable_estop
-                and self.estop_reader.isEstopPlay()
+                # and self.estop_reader.isEstopPlay()
                 and (
                     self.robots_connected_to_fullsystem
                     or self.robots_connected_to_manual

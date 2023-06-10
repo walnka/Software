@@ -29,8 +29,10 @@ ThreadedProtoRadioListener<ReceiveProtoT>::ThreadedProtoRadioListener(uint8_t ch
     radio_listener(channel, multicast_level, address, receive_callback)
 {
     // start the thread to run the io_service in the background
+    std::cout << "starting radio listener thread" << std::endl;
     radio_listener_thread = std::thread([this]() {
         for (;;) {
+            std::cout << "receiving" << std::endl;
             radio_listener.receive();
             usleep(POLL_INTERVAL_MS * MICROSECONDS_PER_MILLISECOND);
         }

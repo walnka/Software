@@ -6,12 +6,15 @@ RadioService::RadioService(uint8_t channel, uint8_t multicast_level, uint8_t add
 {
     // TODO: construct listeners and packet trackers
     // sender = std::make_unique<ProtoRadioSender<TbotsProto::RobotStatus>>(channel, multicast_level, address);
+    std::cout << "Initializing world listener" << std::endl;
     world_listener = std::make_unique<ThreadedProtoRadioListener<TbotsProto::World>>(
             channel, multicast_level, address, boost::bind(&RadioService::worldCallback, this, _1)
             );
+    std::cout << "Initializing primitive set listener" << std::endl;
     primitive_set_listener = std::make_unique<ThreadedProtoRadioListener<TbotsProto::PrimitiveSet>>(
             channel, multicast_level, address, boost::bind(&RadioService::primitiveSetCallback, this, _1)
     );
+    std::cout << "Finished constructing radio service" << std::endl;
 }
 
 std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World> RadioService::poll()

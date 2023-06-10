@@ -50,9 +50,10 @@ Thunderloop::Thunderloop(const RobotConstants_t& robot_constants, const int loop
     //  channel=0,
     //  multicast_level=1,
     //  address=1
+    std::cout << "Initializing Radio Service" << std::endl;
     radio_service_ = std::make_unique<RadioService>(0, 1, 1);
-    LOG(INFO)
-        << "THUNDERLOOP: Radio Service initialized!";
+
+    std::cout << "Radio Service initialized" << std::endl;
 //
 //    motor_service_ = std::make_unique<MotorService>(robot_constants, loop_hz);
 //    LOG(INFO)

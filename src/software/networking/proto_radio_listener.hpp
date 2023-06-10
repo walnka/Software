@@ -4,6 +4,7 @@
 #include <RF24Network/RF24Network.h>
 #include <cstdint>
 #include <functional>
+#include "software/logger/logger.h"
 
 template <class ReceiveProtoT>
 class ProtoRadioListener
@@ -14,8 +15,10 @@ public:
     virtual  ~ProtoRadioListener();
     void receive();
 private:
-    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
-    static const uint8_t csn_pin = 1; // SPI Chip Select pin
+//    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
+//    static const uint8_t csn_pin = 1; // SPI Chip Select pin
+    static const uint8_t ce_pin = 10; // SPI Chip Enable pin
+    static const uint8_t csn_pin = 50; // SPI Chip Select pin
     RF24 radio;
     RF24Network network;
 
@@ -27,6 +30,15 @@ template <class ReceiveProtoT>
 ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t multicast_level,
                                                       uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
         radio(RF24(ce_pin, csn_pin)), network(RF24Network(radio)), receive_callback(receive_callback){
+    LOG(INFO) << "Initializing Radio Listener";
+    try {
+        if (!radio.begin()) {
+            LOG(INFO) << "Radio hardware not responding!";
+        }
+    }
+    catch (...) {
+        LOG(INFO) << "proto_radio_listener.hpp: radio.begin() threw exception";
+    }
     radio.setChannel(channel);
     radio.setAutoAck(false);
     network.begin(address);
@@ -38,6 +50,7 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
     }
 
     network.multicastLevel(multicast_level);
+    LOG(INFO) << "Radio Listener Initialized";
 };
 
 template<class ReceiveProtoT>
