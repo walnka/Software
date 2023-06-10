@@ -96,20 +96,21 @@ class RobotCommunication(object):
         :return:
         """
         while self.running:
-            world = self.world_buffer.get(block=True, return_cached=False)
-            if (
-                not self.disable_estop
-                # and self.estop_reader.isEstopPlay()
-                and (
-                    self.robots_connected_to_fullsystem
-                    or self.robots_connected_to_manual
-                )
-            ):
-                # send the world proto
-                # self.send_world.send_proto(world)
-                # TODO: Send blank world for testing
-                test_world = World()
-                self.send_world.send_proto(test_world)
+            # world = self.world_buffer.get(block=True, return_cached=False)
+            # if (
+            #     not self.disable_estop
+            #     # and self.estop_reader.isEstopPlay()
+            #     and (
+            #         self.robots_connected_to_fullsystem
+            #         or self.robots_connected_to_manual
+            #     )
+            # ):
+            # send the world proto
+            # self.send_world.send_proto(world)
+            # TODO: Send blank world for testing
+            test_world = createWorldProto(createBlankTestingWorld())
+            # print(test_world)
+            self.send_world.send_proto(test_world)
 
     def run_primitive_set(self):
         """Forward PrimitiveSet protos from fullsystem to the robots.
@@ -222,7 +223,7 @@ class RobotCommunication(object):
         # )
 
         # TODO: Test Radio
-        self.send_world = WorldProtoRadioSender(0, 1, 1)
+        self.send_world = WorldProtoRadioSender(0, 1, 0)
 
         self.robots_connected_to_fullsystem = {
             robot_id for robot_id in range(MAX_ROBOT_IDS_PER_SIDE)

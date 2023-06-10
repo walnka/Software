@@ -36,7 +36,7 @@ Thunderloop::Thunderloop(const RobotConstants_t& robot_constants, const int loop
       primitive_executor_(Duration::fromSeconds(1.0 / loop_hz), robot_constants,
                           TeamColour::YELLOW, robot_id_)
 {
-//    NetworkLoggerSingleton::initializeLogger(channel_id_, network_interface_, robot_id_);
+    NetworkLoggerSingleton::initializeLogger(channel_id_, network_interface_, robot_id_);
 //    LOG(INFO)
 //        << "THUNDERLOOP: Network Logger initialized! Next initializing Network Service";
 //
@@ -185,14 +185,15 @@ Thunderloop::~Thunderloop() {}
 //                getMilliseconds(time_since_last_vision_received));
 
             // If the world msg is new, update the internal buffer
-            if (new_world.time_sent().epoch_timestamp_seconds() >
-                world_.time_sent().epoch_timestamp_seconds())
+//            if (new_world.time_sent().epoch_timestamp_seconds() >
+//                world_.time_sent().epoch_timestamp_seconds())
             {
                 clock_gettime(CLOCK_MONOTONIC, &last_world_recieved_time);
-                primitive_executor_.updateWorld(new_world);
+//                primitive_executor_.updateWorld(new_world);
                 world_ = new_world;
-                LOG(WARNING) << world_;
+                LOG(WARNING) << world_.DebugString();
             }
+//            LOG(WARNING) << "PRINT";
 //
 //            if (motor_status_.has_value())
 //            {

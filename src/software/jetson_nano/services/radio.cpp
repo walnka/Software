@@ -45,6 +45,7 @@ void RadioService::primitiveSetCallback(TbotsProto::PrimitiveSet input)
 
 void RadioService::worldCallback(TbotsProto::World input)
 {
+    LOG(WARNING) << "WORLD CALLBACK";
     std::scoped_lock<std::mutex> lock(world_mutex);
     const uint64_t seq_num = input.sequence_number();
 

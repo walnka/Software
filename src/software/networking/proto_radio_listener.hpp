@@ -17,8 +17,8 @@ public:
 private:
 //    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
 //    static const uint8_t csn_pin = 1; // SPI Chip Select pin
-    static const uint8_t ce_pin = 10; // SPI Chip Enable pin
-    static const uint8_t csn_pin = 50; // SPI Chip Select pin
+    static const uint8_t ce_pin = 50; // SPI Chip Enable pin
+    static const uint8_t csn_pin = 10; // SPI Chip Select pin
     RF24 radio;
     RF24Network network;
 
@@ -44,13 +44,19 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
     network.begin(address);
     // Close unnecessary pipes
     // We only need the pipe opened for multicast listening
-    for(uint8_t i = 0; i < 6; i++)
-    {
-        radio.closeReadingPipe(i);
-    }
+//    for(uint8_t i = 0; i < 6; i++)
+//    {
+//        radio.closeReadingPipe(i);
+//    }
+    uint64_t addr = 0;
+    radio.openReadingPipe(0, addr);
+    radio.enableDynamicAck();
+    radio.enableDynamicPayloads();
 
     network.multicastLevel(multicast_level);
+    radio.startListening();
     LOG(INFO) << "Radio Listener Initialized";
+    LOG(INFO) << "Network is valid" << network.is_valid_address(address);
 };
 
 template<class ReceiveProtoT>
@@ -60,9 +66,14 @@ ProtoRadioListener<ReceiveProtoT>::~ProtoRadioListener() {
 
 template<class ReceiveProtoT>
 void ProtoRadioListener<ReceiveProtoT>::receive() {
+    if (radio.available()) {
+        LOG(INFO) << "radio available";
+    }
     network.update();
+//    radio.printPrettyDetails();
     while (network.available())
     {
+        LOG(INFO) << "inside loop";
         RF24NetworkHeader header;
         ReceiveProtoT payload;
         network.read(header, &payload, sizeof(payload));

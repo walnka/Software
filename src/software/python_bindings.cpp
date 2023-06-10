@@ -37,8 +37,22 @@
 #include "software/world/field.h"
 #include "software/world/robot.h"
 #include "software/world/world.h"
+#include "proto/message_translation/tbots_protobuf.h"
 
 namespace py = pybind11;
+
+
+World createBlankTestingWorld()
+{
+    Field field        = Field::createSSLDivisionBField();
+    Team friendly_team = Team(Duration::fromMilliseconds(1000));
+    Team enemy_team    = Team(Duration::fromMilliseconds(1000));
+    Ball ball          = Ball(Point(), Vector(), Timestamp::fromSeconds(0));
+
+    World world = World(field, ball, friendly_team, enemy_team);
+
+    return world;
+}
 
 /**
  * Python doesn't have templating, but we would like to re-use the networking
@@ -279,6 +293,9 @@ PYBIND11_MODULE(python_bindings, m)
     m.def("createCircleProto", &createCircleProto);
     m.def("createVectorProto", &createVectorProto);
     m.def("createSegmentProto", &createSegmentProto);
+
+    m.def("createWorldProto", &createWorld);
+    m.def("createBlankTestingWorld", &createBlankTestingWorld);
 
     m.def("contains", py::overload_cast<const Circle&, const Segment&>(&contains));
     m.def("contains", py::overload_cast<const Circle&, const Point&>(&contains));

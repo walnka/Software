@@ -83,6 +83,7 @@ pybind_library(
         "//software/world",
         "//software/world:field",
         "@pybind11_protobuf//pybind11_protobuf:native_proto_caster",
+        "//proto/message_translation:tbots_protobuf"
     ],
 )
 

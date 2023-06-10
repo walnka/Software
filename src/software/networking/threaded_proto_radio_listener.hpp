@@ -32,7 +32,6 @@ ThreadedProtoRadioListener<ReceiveProtoT>::ThreadedProtoRadioListener(uint8_t ch
     std::cout << "starting radio listener thread" << std::endl;
     radio_listener_thread = std::thread([this]() {
         for (;;) {
-            std::cout << "receiving" << std::endl;
             radio_listener.receive();
             usleep(POLL_INTERVAL_MS * MICROSECONDS_PER_MILLISECOND);
         }
