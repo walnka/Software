@@ -20,7 +20,7 @@ private:
     static const uint8_t ce_pin = 50; // SPI Chip Enable pin
     static const uint8_t csn_pin = 10; // SPI Chip Select pin
     RF24 radio;
-    RF24Network network;
+//    RF24Network network;
 
     // The function to call on every received packet of ReceiveProtoT data
     std::function<void(ReceiveProtoT&)> receive_callback;
@@ -29,7 +29,7 @@ private:
 template <class ReceiveProtoT>
 ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t multicast_level,
                                                       uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
-        radio(RF24(ce_pin, csn_pin)), network(RF24Network(radio)), receive_callback(receive_callback){
+        radio(RF24(ce_pin, csn_pin, 1000000)), receive_callback(receive_callback){
     LOG(INFO) << "Initializing Radio Listener";
     try {
         if (!radio.begin()) {
@@ -40,43 +40,55 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
         LOG(INFO) << "proto_radio_listener.hpp: radio.begin() threw exception";
     }
     radio.setChannel(channel);
-    radio.setAutoAck(false);
-    network.begin(address);
-    // Close unnecessary pipes
-    // We only need the pipe opened for multicast listening
+    radio.setAutoAck(true);
+
+//    // Close unnecessary pipes
+//    // We only need the pipe opened for multicast listening
 //    for(uint8_t i = 0; i < 6; i++)
 //    {
 //        radio.closeReadingPipe(i);
 //    }
-    uint64_t addr = 0;
-    radio.openReadingPipe(0, addr);
+
+    uint64_t addr = 2;
+    radio.openWritingPipe(1);
+    radio.openReadingPipe(1, addr);
+
     radio.enableDynamicAck();
     radio.enableDynamicPayloads();
 
-    network.multicastLevel(multicast_level);
+//    network.begin(address);
+//    network.multicastLevel(multicast_level);
     radio.startListening();
-    LOG(INFO) << "Radio Listener Initialized";
-    LOG(INFO) << "Network is valid" << network.is_valid_address(address);
+    radio.printPrettyDetails();
 };
 
 template<class ReceiveProtoT>
 ProtoRadioListener<ReceiveProtoT>::~ProtoRadioListener() {
-
+    radio.stopListening();
 }
 
 template<class ReceiveProtoT>
 void ProtoRadioListener<ReceiveProtoT>::receive() {
-    if (radio.available()) {
-        LOG(INFO) << "radio available";
-    }
-    network.update();
-//    radio.printPrettyDetails();
-    while (network.available())
-    {
-        LOG(INFO) << "inside loop";
-        RF24NetworkHeader header;
-        ReceiveProtoT payload;
-        network.read(header, &payload, sizeof(payload));
-        receive_callback(payload);
+//    network.update();
+//    while (network.available())
+//    {
+//        std::cout << "inside loop" << std::endl;
+//        RF24NetworkHeader header;
+//        ReceiveProtoT payload;
+//        uint16_t payloadSize = network.peek(header);
+//        network.read(header, &payload, payloadSize);
+//        receive_callback(payload);
+//    }
+
+    uint8_t pipe;
+    if (radio.available(&pipe)) {
+        uint8_t bytes = radio.getPayloadSize();
+        uint64_t payload;
+        radio.read(&payload, bytes);
+        std::cout << "Received " << (unsigned int) bytes;
+        std::cout << " bytes on pipe" << (unsigned int) pipe;
+        std::cout << ": " << payload << std::endl;
+    } else {
+        std::cout << "RADIO UNAVAILABLE" << std::endl;
     }
 }

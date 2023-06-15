@@ -111,6 +111,7 @@ class RobotCommunication(object):
             test_world = createWorldProto(createBlankTestingWorld())
             # print(test_world)
             self.send_world.send_proto(test_world)
+            time.sleep(1)
 
     def run_primitive_set(self):
         """Forward PrimitiveSet protos from fullsystem to the robots.

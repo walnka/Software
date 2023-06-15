@@ -51,7 +51,8 @@ ThreadedProtoRadioSender<SendProtoT>::ThreadedProtoRadioSender(uint8_t channel,
         for(;;) {
             std::unique_lock lock(radio_mutex);
             radio_cv.wait(lock);
-            std::cout << radio_message.DebugString();
+//            std::cout << radio_message.DebugString();
+
             radio_sender.sendProto(radio_message);
             lock.unlock();
             usleep(POLL_INTERVAL_MS * MICROSECONDS_PER_MILLISECOND);

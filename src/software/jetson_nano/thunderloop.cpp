@@ -191,7 +191,7 @@ Thunderloop::~Thunderloop() {}
                 clock_gettime(CLOCK_MONOTONIC, &last_world_recieved_time);
 //                primitive_executor_.updateWorld(new_world);
                 world_ = new_world;
-                LOG(WARNING) << world_.DebugString();
+//                std::cout << "WORLD DEBUG STRING" << world_.DebugString() << std::endl;
             }
 //            LOG(WARNING) << "PRINT";
 //
