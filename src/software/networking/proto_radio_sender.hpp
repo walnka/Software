@@ -17,7 +17,7 @@ private:
 //    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
 //    static const uint8_t csn_pin = 1; // SPI Chip Select pin
     static const uint8_t ce_pin = 2; // SPI Chip Enable pin
-    static const uint8_t csn_pin = 10; // SPI Chip Select pin
+    static const uint8_t csn_pin = 0; // SPI Chip Select pin
     RF24 radio;
 //    RF24Network network;
 
