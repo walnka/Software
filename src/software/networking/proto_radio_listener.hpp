@@ -17,8 +17,8 @@ public:
 private:
 //    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
 //    static const uint8_t csn_pin = 1; // SPI Chip Select pin
-    static const uint8_t ce_pin = 50; // SPI Chip Enable pin
-    static const uint8_t csn_pin = 10; // SPI Chip Select pin
+    static const uint8_t ce_pin = 77; // SPI Chip Enable pin
+    static const uint8_t csn_pin = 11; // SPI Chip Select pin
     RF24 radio;
 //    RF24Network network;
 
@@ -29,7 +29,7 @@ private:
 template <class ReceiveProtoT>
 ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t multicast_level,
                                                       uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
-        radio(RF24(ce_pin, csn_pin, 1000000)), receive_callback(receive_callback){
+        radio(RF24(ce_pin, csn_pin, 1400000)), receive_callback(receive_callback){
     LOG(INFO) << "Initializing Radio Listener";
     try {
         if (!radio.begin()) {
@@ -50,10 +50,11 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
 //    }
 
     uint64_t addr = 2;
-    radio.openWritingPipe(1);
+    // radio.openWritingPipe(1);
     radio.openReadingPipe(1, addr);
+    // radio.openReadingPipe(0, addr);
 
-    radio.enableDynamicAck();
+    // radio.enableDynamicAck();
     radio.enableDynamicPayloads();
 
 //    network.begin(address);
@@ -82,13 +83,13 @@ void ProtoRadioListener<ReceiveProtoT>::receive() {
 
     uint8_t pipe;
     if (radio.available(&pipe)) {
-        uint8_t bytes = radio.getPayloadSize();
+        uint8_t bytes = radio.getDynamicPayloadSize();
         uint64_t payload;
         radio.read(&payload, bytes);
         std::cout << "Received " << (unsigned int) bytes;
         std::cout << " bytes on pipe" << (unsigned int) pipe;
         std::cout << ": " << payload << std::endl;
     } else {
-        std::cout << "RADIO UNAVAILABLE" << std::endl;
+        // std::cout << "RADIO UNAVAILABLE" << std::endl;
     }
 }

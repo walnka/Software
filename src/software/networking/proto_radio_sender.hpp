@@ -16,8 +16,8 @@ public:
 private:
 //    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
 //    static const uint8_t csn_pin = 1; // SPI Chip Select pin
-    static const uint8_t ce_pin = 2; // SPI Chip Enable pin
-    static const uint8_t csn_pin = 10; // SPI Chip Select pin
+    static const uint8_t ce_pin = 1; // SPI Chip Enable pin
+    static const uint8_t csn_pin = 0; // SPI Chip Select pin
     RF24 radio;
 //    RF24Network network;
 
@@ -29,7 +29,7 @@ private:
 
 template <class SendProtoT>
 ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
-                                              uint8_t address) : radio(RF24(ce_pin, csn_pin)), multicast_level(multicast_level)  {
+                                              uint8_t address) : radio(RF24(ce_pin, csn_pin, 1400000)), multicast_level(multicast_level)  {
     LOG(INFO) << "Initializing Radio Sender";
     try {
         if (!radio.begin()) {
@@ -51,9 +51,9 @@ ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicas
     uint64_t addr = 1;
     uint64_t write_addr = 2;
     radio.openWritingPipe(write_addr);
-    radio.openReadingPipe(1, addr);
+    // radio.openReadingPipe(1, addr);
 
-    radio.enableDynamicAck();
+    // radio.enableDynamicAck();
     radio.enableDynamicPayloads();
 
     radio.stopListening();
