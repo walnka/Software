@@ -49,12 +49,17 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
 //        radio.closeReadingPipe(i);
 //    }
 
-    uint64_t addr = 2;
-    radio.openWritingPipe(1);
-    radio.openReadingPipe(1, addr);
+    //uint64_t addr = 1;
+    uint8_t addr[] = { 0x1, 0x0, 0x0, 0x0, 0x0 };
+    uint8_t addr2[] = { 0x2, 0x0, 0x0, 0x0, 0x0 };
 
-    radio.enableDynamicAck();
-    radio.enableDynamicPayloads();
+    radio.openWritingPipe(addr2);
+    radio.openReadingPipe(0, addr);
+    radio.openReadingPipe(1, addr);
+    radio.openReadingPipe(2, addr);
+
+    //radio.enableDynamicAck();
+    //radio.enableDynamicPayloads();
 
 //    network.begin(address);
 //    network.multicastLevel(multicast_level);
@@ -89,6 +94,5 @@ void ProtoRadioListener<ReceiveProtoT>::receive() {
         std::cout << " bytes on pipe" << (unsigned int) pipe;
         std::cout << ": " << payload << std::endl;
     } else {
-        std::cout << "RADIO UNAVAILABLE" << std::endl;
     }
 }

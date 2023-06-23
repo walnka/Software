@@ -48,18 +48,18 @@ ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicas
 //        radio.closeReadingPipe(i);
 //    }
 
-    uint64_t addr = 1;
-    uint64_t write_addr = 2;
-    radio.openWritingPipe(write_addr);
-    radio.openReadingPipe(1, addr);
+    //uint64_t addr = 1;
+    //uint64_t write_addr = 0;
+    uint8_t addr[] = { 0x1, 0x0, 0x0, 0x0, 0x0 };
+    radio.openWritingPipe(addr);
 
-    radio.enableDynamicAck();
-    radio.enableDynamicPayloads();
+    //radio.enableDynamicAck();
+    //radio.enableDynamicPayloads();
 
-    radio.stopListening();
 
 //    network.begin(address);
 //    network.multicastLevel(multicast_level);
+    radio.stopListening();
     radio.printPrettyDetails();
 };
 
@@ -84,6 +84,7 @@ void ProtoRadioSender<SendProtoT>::sendProto(const SendProtoT& message) {
 //    } else {
 //        std::cout << "SENT PROTO" << std::endl;
 //    }
+    radio.stopListening();
     uint64_t string_message = 0x12345;
 
     bool ok = radio.write(&string_message, sizeof(uint64_t));
