@@ -14,6 +14,7 @@ public:
             uint8_t address, std::function<void(ReceiveProtoT)> receive_callback);
     virtual  ~ProtoRadioListener();
     void receive();
+    uint64_t successCount = 0;
 private:
 //    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
 //    static const uint8_t csn_pin = 1; // SPI Chip Select pin
@@ -40,8 +41,8 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
         LOG(INFO) << "proto_radio_listener.hpp: radio.begin() threw exception";
     }
     radio.setChannel(channel);
-    radio.setAutoAck(true);
-
+    radio.setAutoAck(false);
+    radio.setPALevel(RF24_PA_MAX);
 //    // Close unnecessary pipes
 //    // We only need the pipe opened for multicast listening
 //    for(uint8_t i = 0; i < 6; i++)
@@ -89,6 +90,8 @@ void ProtoRadioListener<ReceiveProtoT>::receive() {
         std::cout << "Received " << (unsigned int) bytes;
         std::cout << " bytes on pipe" << (unsigned int) pipe;
         std::cout << ": " << payload << std::endl;
+        successCount++;
+        std::cout << "Successes " << (unsigned int) successCount << std::endl;
     } else {
         // std::cout << "RADIO UNAVAILABLE" << std::endl;
     }

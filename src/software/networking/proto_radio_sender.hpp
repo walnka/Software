@@ -40,8 +40,8 @@ ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicas
         LOG(INFO) << "proto_radio_sender.hpp: radio.begin() threw exception";
     }
     radio.setChannel(channel);
-    radio.setAutoAck(true);
-
+    radio.setAutoAck(false);
+    radio.setPALevel(RF24_PA_MIN);
 //    // Close unnecessary pipes
 //    // We only need the pipe opened for multicast listening
 //    for(int i = 0; i < 6; i++) {
