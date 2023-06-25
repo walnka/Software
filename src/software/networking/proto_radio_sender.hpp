@@ -29,7 +29,7 @@ private:
 
 template <class SendProtoT>
 ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
-                                              uint8_t address) : radio(RF24(ce_pin, csn_pin)), multicast_level(multicast_level)  {
+                                              uint8_t address) : radio(RF24(ce_pin, csn_pin, 1400000)), multicast_level(multicast_level)  {
     LOG(INFO) << "Initializing Radio Sender";
     try {
         if (!radio.begin()) {
@@ -40,7 +40,8 @@ ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicas
         LOG(INFO) << "proto_radio_sender.hpp: radio.begin() threw exception";
     }
     radio.setChannel(channel);
-    radio.setAutoAck(true);
+    radio.setPALevel(RF24_PA_MIN);
+    radio.setAutoAck(false);
 
 //    // Close unnecessary pipes
 //    // We only need the pipe opened for multicast listening
@@ -54,7 +55,7 @@ ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicas
     radio.openWritingPipe(addr);
 
     //radio.enableDynamicAck();
-    //radio.enableDynamicPayloads();
+    radio.enableDynamicPayloads();
 
 
 //    network.begin(address);
@@ -84,7 +85,6 @@ void ProtoRadioSender<SendProtoT>::sendProto(const SendProtoT& message) {
 //    } else {
 //        std::cout << "SENT PROTO" << std::endl;
 //    }
-    radio.stopListening();
     uint64_t string_message = 0x12345;
 
     bool ok = radio.write(&string_message, sizeof(uint64_t));

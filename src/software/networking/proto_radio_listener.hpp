@@ -29,7 +29,7 @@ private:
 template <class ReceiveProtoT>
 ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t multicast_level,
                                                       uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
-        radio(RF24(ce_pin, csn_pin, 1000000)), receive_callback(receive_callback){
+        radio(RF24(ce_pin, csn_pin, 1400000)), receive_callback(receive_callback){
     LOG(INFO) << "Initializing Radio Listener";
     try {
         if (!radio.begin()) {
@@ -40,7 +40,9 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
         LOG(INFO) << "proto_radio_listener.hpp: radio.begin() threw exception";
     }
     radio.setChannel(channel);
-    radio.setAutoAck(true);
+    radio.setPALevel(RF24_PA_MIN);
+    radio.setAutoAck(false);
+    radio.enableDynamicPayloads();
 
 //    // Close unnecessary pipes
 //    // We only need the pipe opened for multicast listening
@@ -51,15 +53,10 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
 
     //uint64_t addr = 1;
     uint8_t addr[] = { 0x1, 0x0, 0x0, 0x0, 0x0 };
-    uint8_t addr2[] = { 0x2, 0x0, 0x0, 0x0, 0x0 };
 
-    radio.openWritingPipe(addr2);
-    radio.openReadingPipe(0, addr);
+    //radio.openReadingPipe(0, addr);
     radio.openReadingPipe(1, addr);
     radio.openReadingPipe(2, addr);
-
-    //radio.enableDynamicAck();
-    //radio.enableDynamicPayloads();
 
 //    network.begin(address);
 //    network.multicastLevel(multicast_level);
@@ -87,7 +84,7 @@ void ProtoRadioListener<ReceiveProtoT>::receive() {
 
     uint8_t pipe;
     if (radio.available(&pipe)) {
-        uint8_t bytes = radio.getPayloadSize();
+        uint8_t bytes = radio.getDynamicPayloadSize();
         uint64_t payload;
         radio.read(&payload, bytes);
         std::cout << "Received " << (unsigned int) bytes;
