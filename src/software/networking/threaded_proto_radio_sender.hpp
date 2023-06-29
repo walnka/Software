@@ -7,7 +7,6 @@
 #include "software/networking/proto_radio_sender.hpp"
 #include "shared/constants.h"
 
-template <class SendProto>
 class ThreadedProtoRadioSender
 {
 public:
@@ -28,6 +27,7 @@ public:
      *
      * @param message The protobuf message to send
      */
+    template<class SendProtoT>
     void sendProto(const SendProto& message);
 
 private:
@@ -41,7 +41,6 @@ private:
     std::condition_variable radio_cv;
 };
 
-template <class SendProtoT>
 ThreadedProtoRadioSender<SendProtoT>::ThreadedProtoRadioSender(uint8_t channel,
                                                                uint8_t multicast_level,
                                                                uint8_t address) :
@@ -60,7 +59,6 @@ ThreadedProtoRadioSender<SendProtoT>::ThreadedProtoRadioSender(uint8_t channel,
     });
 }
 
-template <class SendProtoT>
 ThreadedProtoRadioSender<SendProtoT>::~ThreadedProtoRadioSender()
 {
     radio_sender_thread.join();

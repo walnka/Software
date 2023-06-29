@@ -10,7 +10,10 @@ class ProtoRadioSender
 public:
     ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
                      uint8_t address);
-    virtual  ~ProtoRadioSender();
+    virtual ~ProtoRadioSender();
+
+    template <class SendProtoT>
+    void registerSender();
 
     template <class SendProtoT>
     void sendProto(const SendProtoT& message);
@@ -23,11 +26,12 @@ private:
 
     // Buffer to hold serialized protobuf data
     std::string data_buffer;
+
+    std::map<std::string, uint8_t[]> protobuf_name_to_address;
 };
 
-template <class SendProtoT>
-ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
-                                              uint8_t address) : radio(RF24(ce_pin, csn_pin, 1400000)), multicast_level(multicast_level)  {
+ProtoRadioSender::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
+                                              uint8_t address) : radio(RF24(CE_PIN, CSN_PIN, 1400000)), multicast_level(multicast_level)  {
     LOG(INFO) << "Initializing Radio Sender";
     try {
         if (!radio.begin()) {
@@ -62,13 +66,34 @@ ProtoRadioSender<SendProtoT>::ProtoRadioSender(uint8_t channel, uint8_t multicas
     radio.printPrettyDetails();
 };
 
-template<class SendProtoT>
 ProtoRadioSender<SendProtoT>::~ProtoRadioSender() {
+}
 
+template<class SendProtoT>
+void ProtoRadioSender::registerSender<SendProtoT>(uint8_t[] address)
+{
+    protobuf_name_to_address[SendProtoT::descriptor()->full_name()] = address;
 }
 
 template<class SendProtoT>
 void ProtoRadioSender<SendProtoT>::sendProto(const SendProtoT& message) {
+    if (!protobuf_name_to_address.contains(message.GetDescriptor()->full_name()))
+    {
+        LOG(WARNING) << message.GetDescriptor()->full_name() << " is not registered with the ProtoRadioSender";
+        return
+    }
+
+    message.SerializeToString(&data_buffer);
+
+    unsigned int max_size = std::pow(2, sizeof(uint8_t)*8)*(1+RADIO_PACKET_PAYLOAD_SIZE);
+    if (data_buffer.length() > max_size)
+    {
+        LOG(WARNING) << message.GetDescriptor()->full_name() << " is larger than the radio wrapper can support. Packet is dropped";
+        return
+    }
+
+    radio.openWritingPipe(protobuf_name_to_address[message.GetDescriptor()->full_name()]);
+
     // TODO: catch cant send spi message runtime error
 //    message.SerializeToString(&data_buffer);
 //    network.update();
