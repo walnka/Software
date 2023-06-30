@@ -12,6 +12,10 @@ public:
                      uint8_t address);
     virtual ~ProtoRadioSender();
 
+    virtual void send();
+
+    virtual void transmit();
+
     template <class SendProtoT>
     void registerSender();
 
@@ -25,7 +29,7 @@ private:
     uint8_t multicast_level;
 
     // Buffer to hold serialized protobuf data
-    std::string data_buffer;
+    uint8_t data_buffer[RADIO_PACKET_SIZE];
 
     std::map<std::string, uint8_t[]> protobuf_name_to_address;
 };
@@ -33,35 +37,14 @@ private:
 ProtoRadioSender::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
                                               uint8_t address) : radio(RF24(CE_PIN, CSN_PIN, 1400000)), multicast_level(multicast_level)  {
     LOG(INFO) << "Initializing Radio Sender";
-    try {
-        if (!radio.begin()) {
-            LOG(INFO) << "Radio hardware not responding!";
-        }
+    if (!radio.begin()) {
+        LOG(INFO) << "Radio hardware not responding!";
     }
-    catch (...) {
-        LOG(INFO) << "proto_radio_sender.hpp: radio.begin() threw exception";
-    }
+
     radio.setChannel(channel);
     radio.setPALevel(RF24_PA_MIN);
     radio.setAutoAck(false);
-
-//    // Close unnecessary pipes
-//    // We only need the pipe opened for multicast listening
-//    for(int i = 0; i < 6; i++) {
-//        radio.closeReadingPipe(i);
-//    }
-
-    //uint64_t addr = 1;
-    //uint64_t write_addr = 0;
-    uint8_t addr[] = { 0x1, 0x0, 0x0, 0x0, 0x0 };
-    radio.openWritingPipe(addr);
-
-    //radio.enableDynamicAck();
     radio.enableDynamicPayloads();
-
-
-//    network.begin(address);
-//    network.multicastLevel(multicast_level);
     radio.stopListening();
     radio.printPrettyDetails();
 };
@@ -69,51 +52,42 @@ ProtoRadioSender::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
 ProtoRadioSender<SendProtoT>::~ProtoRadioSender() {
 }
 
-template<class SendProtoT>
-void ProtoRadioSender::registerSender<SendProtoT>(uint8_t[] address)
+void ProtoRadioSender::send(uint8_t address[], std::string data)
 {
-    protobuf_name_to_address[SendProtoT::descriptor()->full_name()] = address;
-}
-
-template<class SendProtoT>
-void ProtoRadioSender<SendProtoT>::sendProto(const SendProtoT& message) {
-    if (!protobuf_name_to_address.contains(message.GetDescriptor()->full_name()))
+    int max_size = std::pow(2, sizeof(uint8_t)*8)*(1+RADIO_PACKET_PAYLOAD_SIZE);
+    if (data.length() > max_size)
     {
-        LOG(WARNING) << message.GetDescriptor()->full_name() << " is not registered with the ProtoRadioSender";
+        LOG(WARNING) << "[ProtoRadioSender] Sender is larger than the radio wrapper can support. Packet is dropped";
         return
     }
 
-    message.SerializeToString(&data_buffer);
-
-    unsigned int max_size = std::pow(2, sizeof(uint8_t)*8)*(1+RADIO_PACKET_PAYLOAD_SIZE);
-    if (data_buffer.length() > max_size)
+    radio.openWritingPipe(address);
+    int num_packets = data.length() / RADIO_PACKET_PAYLOAD_SIZE;
+    int data_offset = data.length() % RADIO_PACKET_PAYLOAD_SIZE;
+    const char* data_ptr = data.data();
+    for (int packet_index = 0; packet_index < num_packets; ++packet_index)
     {
-        LOG(WARNING) << message.GetDescriptor()->full_name() << " is larger than the radio wrapper can support. Packet is dropped";
-        return
+        data_buffer[RADIO_PACKET_LENGTH_INDEX] = num_packets;
+        data_buffer[RADIO_PACKET_OFFSET_INDEX] = data_offset;
+        data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] = packet_index;
+
+        memcpy(&data_buffer[RADIO_HEADER_SIZE], data_ptr, RADIO_PACKET_PAYLOAD_SIZE);
+        data_ptr += RADIO_PACKET_PAYLOAD_SIZE;
+
+        if (!radio.write(&data_buffer, RADIO_PACKET_SIZE))
+        {
+            LOG(WARNING) << "[ProtoRadioSender] Unable to send packet of type " << proto_type;
+            return;
+        }
+
     }
-
-    radio.openWritingPipe(protobuf_name_to_address[message.GetDescriptor()->full_name()]);
-
-    // TODO: catch cant send spi message runtime error
-//    message.SerializeToString(&data_buffer);
-//    network.update();
-    // multicast sets the receiving node to a multicast address for the header so we can just default construct it
-//    RF24NetworkHeader header(1);
-//    bool ok = network.multicast(header, data_buffer.data(), data_buffer.length(), multicast_level);
-    // Potentially add delays
-//    if (!ok)
-//    {
-//        LOG(INFO) << "ProtoRadioSender sendProto failed";
-//        std::cout << "NOT OK" << std::endl;
-//    } else {
-//        std::cout << "SENT PROTO" << std::endl;
-//    }
-
-    //bool ok = radio.write(&string_message, sizeof(uint64_t));
-    //if (ok)
-    //{
-    //    std::cout << "Message sent" << std::endl;
-    //} else {
-    //    std::cout << "Message failed to send" << std::endl;
-    //}
+    data_buffer[RADIO_PACKET_LENGTH_INDEX] = num_packets;
+    data_buffer[RADIO_PACKET_OFFSET_INDEX] = data_offset;
+    data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] = num_packets;
+    memcpy(&data_buffer[RADIO_HEADER_SIZE], data_ptr, data_offset);
+    if (!radio.write(&data_buffer, RADIO_PACKET_SIZE))
+    {
+        LOG(WARNING) << "[ProtoRadioSender] Unable to send packet of type " << proto_type;
+        return;
+    }
 }

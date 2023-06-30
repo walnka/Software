@@ -68,3 +68,4 @@ static constexpr uint8_t PRIMITIVE_SET_RADIO_ADDRESS[] = { 0x1, 0x0, 0x0, 0x0, 0
 static constexpr uint8_t RADIO_PACKET_LENGTH_INDEX = 0;
 static constexpr uint8_t RADIO_PACKET_OFFSET_INDEX = 1;
 static constexpr uint8_t RADIO_PACKET_SEQUENCE_NUM_INDEX = 2;
+static constexpr int RADIO_MAX_PROTO_TYPES = 6;
