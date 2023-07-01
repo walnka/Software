@@ -6,7 +6,6 @@
 #include <functional>
 #include "software/logger/logger.h"
 
-template <class ReceiveProtoT>
 class ProtoRadioListener
 {
 public:
@@ -15,28 +14,38 @@ public:
     virtual  ~ProtoRadioListener();
     void receive();
 private:
-//    static const uint8_t ce_pin = 0; // SPI Chip Enable pin
-//    static const uint8_t csn_pin = 1; // SPI Chip Select pin
-    static const uint8_t ce_pin = 50; // SPI Chip Enable pin
-    static const uint8_t csn_pin = 10; // SPI Chip Select pin
+    static const uint8_t CE_PIN = 50;
+    static const uint8_t CSN_PIN = 10;
+    static const uint8_t SPI_SPEED = 1400000;
     RF24 radio;
 //    RF24Network network;
 
     // The function to call on every received packet of ReceiveProtoT data
-    std::function<void(ReceiveProtoT&)> receive_callback;
+    bool valid_pipes[RADIO_MAX_PROTO_TYPES];
+    std::function<void(std::string)> pipe_to_callback;
+    uint8_t data_buffer[RADIO_PACKET_SIZE];
+    std::stringstream assembled_data;
+
+    bool is_currently_reading;
+    uint8_t currently_reading_pipe;
+    uint8_t next_expected_packet_sequence_num;
+    uint8_t expected_num_packets;
+    uint8_t expected_offset;
 };
 
-template <class ReceiveProtoT>
 ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t multicast_level,
                                                       uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
-        radio(RF24(ce_pin, csn_pin, 1400000)), receive_callback(receive_callback){
+        radio(RF24(CE_PIN, CSN_PIN, SPI_SPEED)),
+        valid_pipes({ false })
+{
     LOG(INFO) << "Initializing Radio Listener";
     try {
         if (!radio.begin()) {
             LOG(INFO) << "Radio hardware not responding!";
         }
     }
-    catch (...) {
+    catch (...)
+    {
         LOG(INFO) << "proto_radio_listener.hpp: radio.begin() threw exception";
     }
     radio.setChannel(channel);
@@ -44,52 +53,62 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
     radio.setAutoAck(false);
     radio.enableDynamicPayloads();
 
-//    // Close unnecessary pipes
-//    // We only need the pipe opened for multicast listening
-//    for(uint8_t i = 0; i < 6; i++)
-//    {
-//        radio.closeReadingPipe(i);
-//    }
-
-    //uint64_t addr = 1;
-    uint8_t addr[] = { 0x1, 0x0, 0x0, 0x0, 0x0 };
-
-    //radio.openReadingPipe(0, addr);
-    radio.openReadingPipe(1, addr);
-    radio.openReadingPipe(2, addr);
-
-//    network.begin(address);
-//    network.multicastLevel(multicast_level);
     radio.startListening();
     radio.printPrettyDetails();
 };
 
-template<class ReceiveProtoT>
 ProtoRadioListener<ReceiveProtoT>::~ProtoRadioListener() {
     radio.stopListening();
 }
 
-template<class ReceiveProtoT>
-void ProtoRadioListener<ReceiveProtoT>::receive() {
-//    network.update();
-//    while (network.available())
-//    {
-//        std::cout << "inside loop" << std::endl;
-//        RF24NetworkHeader header;
-//        ReceiveProtoT payload;
-//        uint16_t payloadSize = network.peek(header);
-//        network.read(header, &payload, payloadSize);
-//        receive_callback(payload);
-//    }
-
+void ProtoRadioListener::receive() {
     uint8_t pipe;
     if (radio.available(&pipe)) {
         uint8_t bytes = radio.getDynamicPayloadSize();
-        uint64_t payload;
-        radio.read(&payload, bytes);
-        std::cout << "Received " << (unsigned int) bytes;
-        std::cout << " bytes on pipe" << (unsigned int) pipe;
-        std::cout << ": " << payload << std::endl;
-    } else {
+        radio.read(&data_buffer, bytes);
+        handleDataReception(pipe, bytes);
     }
+}
+
+void ProtoRadioListener::handleDataReception(uint8_t received_pipe, uint8_t buf_length)
+{
+    if (!valid_pipes[received_pipe])
+    {
+        LOG(WARNING) << "Received data on pipe " << (int) received_pipe << " which was not registered";
+        return;
+    }
+
+    if (isPacketInvalid(received_pipe, buf_length))
+    {
+        is_currently_reading = false;
+        LOG(WARNING) << "Received an invalid packet on pipe " << (int) received_pipe;
+        return;
+    }
+
+    if (!is_currently_reading)
+    {
+        is_currently_reading = true;
+        currently_reading_pipe = pipe;
+        expected_num_packets = data_buffer[RADIO_PACKET_LENGTH_INDEX];
+        expected_offset = data_buffer[RADIO_PACKET_OFFSET_INDEX];
+        assembled_data.clear();
+    }
+
+    assembled_data.write(&data_buffer[RADIO_HEADER_SIZE], buf_length-RADIO_HEADER_SIZE);
+
+    if (data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] == expected_num_packets)
+    {
+        pipe_to_callback[currently_reading_pipe](assembled_data.str());
+    }
+
+    next_expected_packet_sequence_num++;
+}
+
+bool ProtoRadioListener::isPacketInvalid(uint8_t rcvd_pipe, uint8_t buf_length) const
+{
+    return (is_currently_reading && rcvd_pipe != currently_reading_pipe)
+        || (!is_currently_reading && data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] != 0)
+        || (is_currently_reading && data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] != next_expected_packet_sequence_num)
+        || (is_currently_reading && data_buffer[RADIO_PACKET_OFFSET_INDEX] != expected_offset)
+        || (is_currently_reading && data_buffer[RADIO_PACKET_LENGTH_INDEX] != expected_num_packets)
 }

@@ -30,8 +30,6 @@ private:
 
     // Buffer to hold serialized protobuf data
     uint8_t data_buffer[RADIO_PACKET_SIZE];
-
-    std::map<std::string, uint8_t[]> protobuf_name_to_address;
 };
 
 ProtoRadioSender::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
