@@ -8,8 +8,7 @@
 class ProtoRadioSender
 {
 public:
-    ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
-                     uint8_t address);
+    ProtoRadioSender(uint8_t channel)
     virtual ~ProtoRadioSender();
 
     virtual void send();
@@ -32,8 +31,8 @@ private:
     uint8_t data_buffer[RADIO_PACKET_SIZE];
 };
 
-ProtoRadioSender::ProtoRadioSender(uint8_t channel, uint8_t multicast_level,
-                                              uint8_t address) : radio(RF24(CE_PIN, CSN_PIN, 1400000)), multicast_level(multicast_level)  {
+ProtoRadioSender::ProtoRadioSender(uint8_t channel) : radio(RF24(CE_PIN, CSN_PIN, 1400000)),
+{
     LOG(INFO) << "Initializing Radio Sender";
     if (!radio.begin()) {
         LOG(INFO) << "Radio hardware not responding!";

@@ -16,12 +16,10 @@ public:
      * @param multicast_level
      * @param address
      */
-    ThreadedProtoRadioSender(uint8_t channel, uint8_t multicast_level,
-                             uint8_t address);
+    ThreadedProtoRadioSender(uint8_t channel)
 
     ~ThreadedProtoRadioSender();
 
-    virtual void flushPipe();
 
     template <class SendProtoT>
     void registerSender();
@@ -36,6 +34,8 @@ public:
     void sendProto(const SendProto& message);
 
 private:
+    virtual void flushPipe();
+
     static const unsigned int POLL_INTERVAL_MS = 100;
     ProtoRadioSender<SendProto> radio_sender;
     SendProto radio_message;
@@ -54,10 +54,8 @@ private:
     std::mutex data_mutex[RADIO_MAX_PROTO_TYPES];
 };
 
-ThreadedProtoRadioSender<SendProtoT>::ThreadedProtoRadioSender(uint8_t channel,
-                                                               uint8_t multicast_level,
-                                                               uint8_t address) :
-                                                               radio_sender(channel, multicast_level, address),
+ThreadedProtoRadioSender::ThreadedProtoRadioSender(uint8_t channel)
+                                                             : radio_sender(channel, multicast_level),
                                                                num_open_writers(0),
                                                                data_available({false}),
                                                                current_write_index(0)

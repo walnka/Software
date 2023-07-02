@@ -13,7 +13,13 @@ public:
             uint8_t address, std::function<void(ReceiveProtoT)> receive_callback);
     virtual  ~ProtoRadioListener();
     void receive();
+    
+    template <class SendProtoT>
+    void registerListener();
 private:
+
+    void handleDataReception(uint8_t received_pipe, uint8_t buf_length)
+
     static const uint8_t CE_PIN = 50;
     static const uint8_t CSN_PIN = 10;
     static const uint8_t SPI_SPEED = 1400000;
@@ -68,6 +74,19 @@ void ProtoRadioListener::receive() {
         radio.read(&data_buffer, bytes);
         handleDataReception(pipe, bytes);
     }
+}
+
+void ProtoRadioListener::registerListener<ReceiveProtoT>(uint8_t addr[5], std::function<void>(std::string) callback)
+{
+    auto has_valid_pipe = std::find(std::begin(valid_pipes), std::end(valid_pipes), false);
+    if (pipe_index == std::end(valid_pipes))
+    {
+        LOG(WARNING) << "A maximum of " << RADIO_MAX_PROTO_TYPES << " have already been registered";
+    }
+
+    std::size_t pipe_index = std::distance(std::begin(valid_pipes), has_valid_pipe);
+    valid_pipes[pipe_index] = true;
+    pipe_to_callback[pipe_index] = callback;
 }
 
 void ProtoRadioListener::handleDataReception(uint8_t received_pipe, uint8_t buf_length)

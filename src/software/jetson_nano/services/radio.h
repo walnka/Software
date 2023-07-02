@@ -28,8 +28,9 @@ private:
     // std::unique_ptr<ProtoRadioSender<TbotsProto::RobotStatus>> sender;
 
     // radio receiver
-    std::unique_ptr<ThreadedProtoRadioListener<TbotsProto::World>> world_listener;
-    std::unique_ptr<ThreadedProtoRadioListener<TbotsProto::PrimitiveSet>> primitive_set_listener;
+    ThreadedProtoRadioListener threaded_proto_radio_listener;
+    //std::unique_ptr<ThreadedProtoRadioListener<TbotsProto::World>> world_listener;
+    //std::unique_ptr<ThreadedProtoRadioListener<TbotsProto::PrimitiveSet>> primitive_set_listener;
 
     // radio packet trackers
     ProtoTracker primitive_set_tracker;

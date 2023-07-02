@@ -96,13 +96,10 @@ void declareThreadedProtoUdpListener(py::module& m, std::string name)
 //}
 
 template <typename T>
-void declareThreadedProtoRadioSender(py::module& m, std::string name)
+void declareThreadedProtoRadioSender(py::class_<ThreadedProtoRadioSender> &pyclass)
 {
-    using Class = ThreadedProtoRadioSender<T>;
-    std::string pyclass_name = name + "ProtoRadioSender";
-    py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str(), py::buffer_protocol(), py::dynamic_attr())
-    .def(py::init<uint8_t, uint8_t, uint8_t>())
-    .def("send_proto", &Class::sendProto);
+    pyclass.def("send_proto", &ThreadedProtoRadioSender::sendProto<T>)
+           .def("register_sender", &ThreadedProtoRadioSender::registerSender<T>);
 }
 
 //template <typename T>
@@ -379,11 +376,12 @@ PYBIND11_MODULE(python_bindings, m)
     // Senders
     declareThreadedProtoUdpSender<TbotsProto::World>(m, "World");
     declareThreadedProtoUdpSender<TbotsProto::RobotStatus>(m, "RobotStatus");
-    declareThreadedProtoUdpSender<TbotsProto::PrimitiveSet>(m, "PrimitiveSet");
 
-    // TODO: Test Radio
-    declareThreadedProtoRadioSender<TbotsProto::World>(m, "World");
-
+    threaded_proto_radio_sender_class = py::class_<ThreadedProtoRadioSender>(m, "ThreadedProtoRadioSender")
+        .def(py::init<uint8_t>())
+    
+    declareThreadedProtoRadioSender<TbotsProto::World>(threaded_proto_radio_sender_class);
+    declareThreadedProtoRadioSender<TbotsProto::PrimitiveSet>(threaded_proto_radio_sender_class);
 
     // Estop Reader
     py::class_<ThreadedEstopReader, std::unique_ptr<ThreadedEstopReader>>(

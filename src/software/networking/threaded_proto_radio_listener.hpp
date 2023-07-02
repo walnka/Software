@@ -6,7 +6,6 @@
 #include <thread>
 #include <unistd.h>
 
-template <class ReceiveProtoT>
 class ThreadedProtoRadioListener
 {
 public:
@@ -15,6 +14,8 @@ public:
 
     ~ThreadedProtoRadioListener();
 
+    template <class ReceiveProtoT>
+    registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)>);
 private:
     // The thread running the io_service in the background. This thread will run for the
     // entire lifetime of the class
@@ -23,8 +24,7 @@ private:
     std::thread radio_listener_thread;
 };
 
-template <class ReceiveProtoT>
-ThreadedProtoRadioListener<ReceiveProtoT>::ThreadedProtoRadioListener(uint8_t channel, uint8_t multicast_level,
+ThreadedProtoRadioListener::ThreadedProtoRadioListener(uint8_t channel, uint8_t multicast_level,
                                                                       uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
     radio_listener(channel, multicast_level, address, receive_callback)
 {
@@ -38,8 +38,25 @@ ThreadedProtoRadioListener<ReceiveProtoT>::ThreadedProtoRadioListener(uint8_t ch
     });
 }
 
-template <class ReceiveProtoT>
-ThreadedProtoRadioListener<ReceiveProtoT>::~ThreadedProtoRadioListener()
+ThreadedProtoRadioListener<ReceiveProtoT>::registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void>(ReceiveProtoT) callback)
+{
+    auto packet_data = ReceiveProtoT();
+    std::string raw_data;
+    radio.registerListener<ReceiveProtoT>(addr, 
+            [&raw_data](std::string raw_byte_data)
+            {
+                raw_data = raw_byte_data;
+            });
+
+    if (!packet_data.ParseFromArray(raw_byte_data.data(), raw_byte_data.length()))
+    {
+        LOG(WARNING) << "Packet of received type " ReceiveProtoT::descriptor()->full_name() << " was corrupted";
+        return;
+    }
+    callback(packet_data);
+}
+
+ThreadedProtoRadioListener::~ThreadedProtoRadioListener()
 {
     radio_listener_thread.join();
 }
