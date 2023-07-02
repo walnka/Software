@@ -15,8 +15,6 @@ public:
     virtual void send(uint8_t address[RADIO_ADDR_LENGTH], std::string data);
 
 private:
-    virtual void transmit();
-
     RF24 radio;
     // Buffer to hold serialized protobuf data
     uint8_t data_buffer[RADIO_PACKET_SIZE];
@@ -70,15 +68,14 @@ void ProtoRadioSender::send(uint8_t address[RADIO_ADDR_LENGTH], std::string data
             LOG(WARNING) << "[ProtoRadioSender] Unable to send packet to address " << (unsigned long) address;
             return;
         }
-
     }
     data_buffer[RADIO_PACKET_LENGTH_INDEX] = num_packets;
     data_buffer[RADIO_PACKET_OFFSET_INDEX] = data_offset;
     data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] = num_packets;
     memcpy(&data_buffer[RADIO_HEADER_SIZE], data_ptr, data_offset);
+
     if (!radio.write(&data_buffer, RADIO_PACKET_SIZE))
     {
         LOG(WARNING) << "[ProtoRadioSender] Unable to send packet to address " << (unsigned long)  address;
-        return;
     }
 }

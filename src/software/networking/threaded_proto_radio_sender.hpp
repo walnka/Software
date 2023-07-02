@@ -22,7 +22,7 @@ public:
 
 
     template <class SendProtoT>
-    void registerSender(uint8_t address[RADIO_ADDR_LENGTH]);
+    void registerSender(const uint8_t address[RADIO_ADDR_LENGTH]);
 
     /**
      * Sends a protobuf message to the initialized ip address and port
@@ -120,7 +120,7 @@ void ThreadedProtoRadioSender::sendProto(const SendProtoT &message)
 }
 
 template<class SendProtoT>
-void ProtoRadioSender::registerSender(uint8_t[RADIO_ADDR_LENGTH] address)
+void ThreadedProtoRadioSender::registerSender(const uint8_t address[RADIO_ADDR_LENGTH])
 {
     std::string proto_type = SendProtoT::descriptor()->full_name();
 
@@ -129,10 +129,10 @@ void ProtoRadioSender::registerSender(uint8_t[RADIO_ADDR_LENGTH] address)
         LOG(WARNING) << "[ThreadedProtoRadioSender] Cannot send more than " << RADIO_MAX_PROTO_TYPES << " different proto types. Cannot register " << proto_type;
     }
 
-
-    std::unique_lock lock(radio_lock);
+    std::unique_lock radio_lock(radio_mutex);
     protobuf_to_write_index[proto_type] = num_open_writers;
     write_index_to_address[num_open_writers] = address;
+    data_available[num_open_writers] = false;
     num_open_writers += 1;
-    lock.unlock(radio_lock);
+    radio_lock.unlock();
 }

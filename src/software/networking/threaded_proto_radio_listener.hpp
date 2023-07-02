@@ -15,7 +15,7 @@ public:
     ~ThreadedProtoRadioListener();
 
     template <class ReceiveProtoT>
-    registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback);
+    void registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback);
 private:
     // The thread running the io_service in the background. This thread will run for the
     // entire lifetime of the class
@@ -40,19 +40,19 @@ ThreadedProtoRadioListener::ThreadedProtoRadioListener(uint8_t channel, int spi_
 
 
 template <class ReceiveProtoT>
-ThreadedProtoRadioListener::registerListener<ReceiveProtoT>(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback)
+void ThreadedProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback)
 {
     auto packet_data = ReceiveProtoT();
     std::string raw_data;
-    radio.registerListener(addr, 
+    radio_listener.registerListener(addr, 
             [&raw_data](std::string raw_byte_data)
             {
                 raw_data = raw_byte_data;
             });
 
-    if (!packet_data.ParseFromArray(raw_byte_data.data(), raw_byte_data.length()))
+    if (!packet_data.ParseFromArray(raw_data.data(), static_cast<int>(raw_data.length())))
     {
-        LOG(WARNING) << "Packet of received type " ReceiveProtoT::descriptor()->full_name() << " was corrupted";
+        LOG(WARNING) << "Packet of received type " << ReceiveProtoT::descriptor()->full_name() << " was corrupted";
         return;
     }
     callback(packet_data);

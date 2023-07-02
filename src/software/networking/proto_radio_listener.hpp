@@ -15,7 +15,7 @@ public:
     virtual ~ProtoRadioListener();
     void receive();
     
-    void registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(std::string)> callback);
+    void registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(std::string)> callback);
 private:
 
     bool isPacketInvalid(uint8_t rcvd_pipe, uint8_t buf_length) const;
@@ -74,7 +74,7 @@ void ProtoRadioListener::receive() {
     }
 }
 
-void ProtoRadioListener::registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(std::string)> callback)
+void ProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(std::string)> callback)
 {
     auto pipe_it = std::find(std::begin(valid_pipes), std::end(valid_pipes), false);
     if (pipe_it == std::end(valid_pipes))
