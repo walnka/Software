@@ -1,35 +1,34 @@
 #pragma once
 
+#include "software/logger/logger.h"
+#include "software/constants.h"
+
 #include <RF24/RF24.h>
-#include <RF24Network/RF24Network.h>
 #include <cstdint>
 #include <functional>
-#include "software/logger/logger.h"
 
 class ProtoRadioListener
 {
 public:
-    ProtoRadioListener(uint8_t channel, uint8_t multicast_level,
-            uint8_t address, std::function<void(ReceiveProtoT)> receive_callback);
-    virtual  ~ProtoRadioListener();
+    ProtoRadioListener(uint8_t channel, int spi_speed);
+
+    virtual ~ProtoRadioListener();
     void receive();
     
-    template <class SendProtoT>
-    void registerListener();
+    void registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(std::string)> callback);
 private:
 
-    void handleDataReception(uint8_t received_pipe, uint8_t buf_length)
+    bool isPacketInvalid(uint8_t rcvd_pipe, uint8_t buf_length) const;
+    void handleDataReception(uint8_t received_pipe, uint8_t buf_length);
 
     static const uint8_t CE_PIN = 50;
     static const uint8_t CSN_PIN = 10;
-    static const uint8_t SPI_SPEED = 1400000;
     RF24 radio;
-//    RF24Network network;
 
     // The function to call on every received packet of ReceiveProtoT data
     bool valid_pipes[RADIO_MAX_PROTO_TYPES];
-    std::function<void(std::string)> pipe_to_callback;
-    uint8_t data_buffer[RADIO_PACKET_SIZE];
+    std::function<void(std::string)> pipe_to_callback[RADIO_MAX_PROTO_TYPES];
+    char data_buffer[RADIO_PACKET_SIZE];
     std::stringstream assembled_data;
 
     bool is_currently_reading;
@@ -39,10 +38,9 @@ private:
     uint8_t expected_offset;
 };
 
-ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t multicast_level,
-                                                      uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
-        radio(RF24(CE_PIN, CSN_PIN, SPI_SPEED)),
-        valid_pipes({ false })
+ProtoRadioListener::ProtoRadioListener(uint8_t channel, int spi_speed)
+    : radio(RF24(CE_PIN, CSN_PIN, spi_speed)),
+    valid_pipes{}
 {
     LOG(INFO) << "Initializing Radio Listener";
     try {
@@ -63,7 +61,7 @@ ProtoRadioListener<ReceiveProtoT>::ProtoRadioListener(uint8_t channel, uint8_t m
     radio.printPrettyDetails();
 };
 
-ProtoRadioListener<ReceiveProtoT>::~ProtoRadioListener() {
+ProtoRadioListener::~ProtoRadioListener() {
     radio.stopListening();
 }
 
@@ -76,15 +74,15 @@ void ProtoRadioListener::receive() {
     }
 }
 
-void ProtoRadioListener::registerListener<ReceiveProtoT>(uint8_t addr[5], std::function<void>(std::string) callback)
+void ProtoRadioListener::registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(std::string)> callback)
 {
-    auto has_valid_pipe = std::find(std::begin(valid_pipes), std::end(valid_pipes), false);
-    if (pipe_index == std::end(valid_pipes))
+    auto pipe_it = std::find(std::begin(valid_pipes), std::end(valid_pipes), false);
+    if (pipe_it == std::end(valid_pipes))
     {
         LOG(WARNING) << "A maximum of " << RADIO_MAX_PROTO_TYPES << " have already been registered";
     }
 
-    std::size_t pipe_index = std::distance(std::begin(valid_pipes), has_valid_pipe);
+    std::size_t pipe_index = std::distance(std::begin(valid_pipes), pipe_it);
     valid_pipes[pipe_index] = true;
     pipe_to_callback[pipe_index] = callback;
 }
@@ -107,7 +105,7 @@ void ProtoRadioListener::handleDataReception(uint8_t received_pipe, uint8_t buf_
     if (!is_currently_reading)
     {
         is_currently_reading = true;
-        currently_reading_pipe = pipe;
+        currently_reading_pipe = received_pipe;
         expected_num_packets = data_buffer[RADIO_PACKET_LENGTH_INDEX];
         expected_offset = data_buffer[RADIO_PACKET_OFFSET_INDEX];
         assembled_data.clear();
@@ -129,5 +127,5 @@ bool ProtoRadioListener::isPacketInvalid(uint8_t rcvd_pipe, uint8_t buf_length) 
         || (!is_currently_reading && data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] != 0)
         || (is_currently_reading && data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] != next_expected_packet_sequence_num)
         || (is_currently_reading && data_buffer[RADIO_PACKET_OFFSET_INDEX] != expected_offset)
-        || (is_currently_reading && data_buffer[RADIO_PACKET_LENGTH_INDEX] != expected_num_packets)
+        || (is_currently_reading && data_buffer[RADIO_PACKET_LENGTH_INDEX] != expected_num_packets);
 }

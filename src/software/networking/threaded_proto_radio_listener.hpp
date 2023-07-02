@@ -9,24 +9,24 @@
 class ThreadedProtoRadioListener
 {
 public:
-    ThreadedProtoRadioListener(uint8_t channel, uint8_t multicast_level, uint8_t address,
-                               std::function<void(ReceiveProtoT)> receive_callback);
+    ThreadedProtoRadioListener(uint8_t channel,
+                               int spi_speed=1400000);
 
     ~ThreadedProtoRadioListener();
 
     template <class ReceiveProtoT>
-    registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)>);
+    registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback);
 private:
     // The thread running the io_service in the background. This thread will run for the
     // entire lifetime of the class
     static const unsigned int POLL_INTERVAL_MS = 10;
-    ProtoRadioListener<ReceiveProtoT> radio_listener;
+
     std::thread radio_listener_thread;
+    ProtoRadioListener radio_listener;
 };
 
-ThreadedProtoRadioListener::ThreadedProtoRadioListener(uint8_t channel, uint8_t multicast_level,
-                                                                      uint8_t address, std::function<void(ReceiveProtoT)> receive_callback) :
-    radio_listener(channel, multicast_level, address, receive_callback)
+ThreadedProtoRadioListener::ThreadedProtoRadioListener(uint8_t channel, int spi_speed)
+    : radio_listener(channel, spi_speed)
 {
     // start the thread to run the io_service in the background
     std::cout << "starting radio listener thread" << std::endl;
@@ -38,11 +38,13 @@ ThreadedProtoRadioListener::ThreadedProtoRadioListener(uint8_t channel, uint8_t 
     });
 }
 
-ThreadedProtoRadioListener<ReceiveProtoT>::registerListener(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void>(ReceiveProtoT) callback)
+
+template <class ReceiveProtoT>
+ThreadedProtoRadioListener::registerListener<ReceiveProtoT>(uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback)
 {
     auto packet_data = ReceiveProtoT();
     std::string raw_data;
-    radio.registerListener<ReceiveProtoT>(addr, 
+    radio.registerListener(addr, 
             [&raw_data](std::string raw_byte_data)
             {
                 raw_data = raw_byte_data;

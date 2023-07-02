@@ -8,11 +8,12 @@
 #include "proto/world.pb.h"
 #include "software/jetson_nano/services/network/proto_tracker.h"
 #include "software/logger/logger.h"
+#include "software/constants.h"
 
 class RadioService
 {
 public:
-    RadioService(uint8_t channel, uint8_t multicast_level, uint8_t address);
+    RadioService(uint8_t channel);
     std::tuple<TbotsProto::PrimitiveSet, TbotsProto::World> poll();
 private:
     void worldCallback(TbotsProto::World input);

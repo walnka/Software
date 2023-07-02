@@ -1,7 +1,7 @@
 #include "software/jetson_nano/services/radio.h"
 
-RadioService::RadioService(uint8_t channel, uint8_t multicast_level)
-        : threaded_proto_radio_listener(channel, multicast_level),
+RadioService::RadioService(uint8_t channel)
+        : threaded_proto_radio_listener(channel),
           primitive_set_tracker(ProtoTracker("primitive set")),
           world_tracker(ProtoTracker("world"))
 {
@@ -9,7 +9,7 @@ RadioService::RadioService(uint8_t channel, uint8_t multicast_level)
     // sender = std::make_unique<ProtoRadioSender<TbotsProto::RobotStatus>>(channel, multicast_level, address);
     std::cout << "Initializing world listener" << std::endl;
     threaded_proto_radio_listener.registerListener<TbotsProto::World>(WORLD_PROTO_RADIO_ADDRESS, boost::bind(&RadioService::worldCallback, this, _1));
-    threaded_proto_radio_listener.registerListener<TbotsProto::PrimitiveSet>>(PRIMITIVE_SET_RADIO_ADDRESS, boost::bind(&RadioService::primitiveSetCallback, this, _1));
+    threaded_proto_radio_listener.registerListener<TbotsProto::PrimitiveSet>(PRIMITIVE_SET_RADIO_ADDRESS, boost::bind(&RadioService::primitiveSetCallback, this, _1));
     //world_listener = std::make_unique<ThreadedProtoRadioListener<TbotsProto::World>>(
     //        channel, multicast_level, address, boost::bind(&RadioService::worldCallback, this, _1)
     //        );

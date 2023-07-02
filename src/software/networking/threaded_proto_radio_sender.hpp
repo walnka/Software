@@ -16,13 +16,13 @@ public:
      * @param multicast_level
      * @param address
      */
-    ThreadedProtoRadioSender(uint8_t channel)
+    ThreadedProtoRadioSender(uint8_t channel, int spi_speed=1400000);
 
     ~ThreadedProtoRadioSender();
 
 
     template <class SendProtoT>
-    void registerSender();
+    void registerSender(uint8_t address[RADIO_ADDR_LENGTH]);
 
     /**
      * Sends a protobuf message to the initialized ip address and port
@@ -31,14 +31,13 @@ public:
      * @param message The protobuf message to send
      */
     template<class SendProtoT>
-    void sendProto(const SendProto& message);
+    void sendProto(const SendProtoT& message);
 
 private:
     virtual void flushPipe();
 
-    static const unsigned int POLL_INTERVAL_MS = 100;
-    ProtoRadioSender<SendProto> radio_sender;
-    SendProto radio_message;
+    ProtoRadioSender radio_sender;
+
     // The thread running the io_service in the background. This thread will run for the
     // entire lifetime of the class
     std::thread radio_sender_thread;
@@ -52,26 +51,27 @@ private:
     std::map<int, std::string> write_index_to_data;
     bool data_available[RADIO_MAX_PROTO_TYPES];
     std::mutex data_mutex[RADIO_MAX_PROTO_TYPES];
+
+    static const unsigned int POLL_INTERVAL_MS = 100;
 };
 
-ThreadedProtoRadioSender::ThreadedProtoRadioSender(uint8_t channel)
-                                                             : radio_sender(channel, multicast_level),
+ThreadedProtoRadioSender::ThreadedProtoRadioSender(uint8_t channel, int spi_speed)
+                                                             : radio_sender(channel, spi_speed),
                                                                num_open_writers(0),
-                                                               data_available({false}),
-                                                               current_write_index(0)
+                                                               current_write_index(0),
+                                                               data_available{}
 {
     radio_sender_thread = std::thread([this]() {
         for(;;) {
+            std::unique_lock lock(radio_mutex);
             while(!data_available)
             {
-                std::unique_lock lock(radio_mutex);
                 radio_cv.wait(lock);
             }
             for (int i = 0; i < num_open_writers; ++i)
             {
                 flushPipe();
             }
-            radio_sender.sendProto(radio_message);
             lock.unlock();
             usleep(POLL_INTERVAL_MS * MICROSECONDS_PER_MILLISECOND);
         }
@@ -98,7 +98,7 @@ void ThreadedProtoRadioSender::flushPipe()
 }
 
 template <class SendProtoT>
-void ThreadedProtoRadioSender<SendProtoT>::sendProto(const SendProtoT &message)
+void ThreadedProtoRadioSender::sendProto(const SendProtoT &message)
 {
     std::string proto_type = message.GetDescriptor()->full_name();
     if (!protobuf_to_write_index.contains(proto_type))
@@ -119,9 +119,8 @@ void ThreadedProtoRadioSender<SendProtoT>::sendProto(const SendProtoT &message)
     radio_cv.notify_one();
 }
 
-
 template<class SendProtoT>
-void ProtoRadioSender::registerSender<SendProtoT>(uint8_t[5] address)
+void ProtoRadioSender::registerSender(uint8_t[RADIO_ADDR_LENGTH] address)
 {
     std::string proto_type = SendProtoT::descriptor()->full_name();
 

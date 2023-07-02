@@ -5,9 +5,11 @@ cc_library(
     hdrs = [
         "proto_radio_sender.hpp",
     ],
+    visibility = ["//visibility:private"],
     deps = [
         "@RF24",
         "@RF24Network",
+        "//software:constants"
     ],
 )
 
@@ -16,9 +18,11 @@ cc_library(
     hdrs = [
         "proto_radio_listener.hpp",
     ],
+    visibility = ["//visibility:private"],
     deps = [
         "@RF24",
         "@RF24Network",
+        "//software:constants"
     ],
 )
 

@@ -40,5 +40,6 @@ cc_library(
         "//software/networking:threaded_proto_radio_sender",
         "//software/jetson_nano/services/network:proto_tracker",
         "//software/logger",
+        "//software:constants",
     ]
 )
