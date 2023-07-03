@@ -85,8 +85,11 @@ void ProtoRadioSender<SendProtoT>::sendProto(const SendProtoT& message) {
 //        std::cout << "SENT PROTO" << std::endl;
 //    }
     uint64_t string_message = 0x12345;
-
-    bool ok = radio.write(&string_message, sizeof(uint64_t));
+    uint8_t buffer[32];
+    for (int i = 0; i<32; i++){
+      buffer[i] = 2;
+    }
+    bool ok = radio.write(&buffer, sizeof(buffer));
     if (ok)
     {
         std::cout << "Message sent" << std::endl;
