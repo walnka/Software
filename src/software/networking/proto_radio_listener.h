@@ -22,7 +22,7 @@ private:
     void handleDataReception(uint8_t received_pipe, uint8_t buf_length);
 
     static const uint8_t CE_PIN = 50;
-    static const uint8_t CSN_PIN = 10;
+    static const uint8_t CSN_PIN = 11;
     RF24 radio;
 
     // The function to call on every received packet of ReceiveProtoT data

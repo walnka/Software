@@ -28,18 +28,21 @@ private:
 template <class ReceiveProtoT>
 void ThreadedProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback)
 {
-    auto packet_data = ReceiveProtoT();
-    std::string raw_data;
     radio_listener.registerListener(addr, 
-            [&raw_data](std::string raw_byte_data)
+            [&](std::string raw_byte_data)
             {
-                raw_data = raw_byte_data;
+                auto packet_data = ReceiveProtoT();
+                if (!packet_data.ParseFromArray(raw_byte_data.data(), static_cast<int>(raw_byte_data.length())))
+                {
+                    LOG(WARNING) << "Packet of received type " << ReceiveProtoT::descriptor()->full_name() << " was corrupted";
+                    return;
+                }
+                else
+                {
+                    LOG(INFO) << "ReceivedProtoT debug string: " << packet_data.DebugString();
+                }
+                
+                callback(packet_data);
             });
 
-    if (!packet_data.ParseFromArray(raw_data.data(), static_cast<int>(raw_data.length())))
-    {
-        LOG(WARNING) << "Packet of received type " << ReceiveProtoT::descriptor()->full_name() << " was corrupted";
-        return;
-    }
-    callback(packet_data);
 }

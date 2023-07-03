@@ -58,12 +58,12 @@ static constexpr unsigned int SSL_VISION_PORT = 10020;
 const std::string SSL_REFEREE_ADDRESS          = "224.5.23.1";
 static constexpr unsigned int SSL_REFEREE_PORT = 10003;
 
-static constexpr unsigned int RADIO_PACKET_SIZE = 32;
+static constexpr unsigned int RADIO_PACKET_SIZE = 22;
 static constexpr unsigned int RADIO_HEADER_SIZE = 3;
 static constexpr long unsigned int RADIO_PACKET_PAYLOAD_SIZE = RADIO_PACKET_SIZE - RADIO_HEADER_SIZE;
 static constexpr unsigned int RADIO_ADDR_LENGTH = 5;
 
-static constexpr uint8_t WORLD_PROTO_RADIO_ADDRESS[RADIO_ADDR_LENGTH] = { 0x0, 0x0, 0x0, 0x0, 0x0 };
+static constexpr uint8_t WORLD_PROTO_RADIO_ADDRESS[RADIO_ADDR_LENGTH] = { 0x2, 0x0, 0x0, 0x0, 0x0 };
 static constexpr uint8_t PRIMITIVE_SET_RADIO_ADDRESS[RADIO_ADDR_LENGTH] = { 0x1, 0x0, 0x0, 0x0, 0x0 };
 
 static constexpr uint8_t RADIO_PACKET_LENGTH_INDEX = 0;

@@ -18,6 +18,6 @@ private:
     // Buffer to hold serialized protobuf data
     uint8_t data_buffer[RADIO_PACKET_SIZE];
 
-    static const uint8_t CE_PIN = 2; // SPI Chip Enable pin
+    static const uint8_t CE_PIN = 1; // SPI Chip Enable pin
     static const uint8_t CSN_PIN = 0; // SPI Chip Select pin
 };

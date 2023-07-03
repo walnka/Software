@@ -18,7 +18,8 @@ ProtoRadioListener::ProtoRadioListener(uint8_t channel, int spi_speed)
     radio.setPALevel(RF24_PA_MIN);
     radio.setAutoAck(false);
     radio.enableDynamicPayloads();
-
+    //radio.enableDynamicAck();
+    
     radio.startListening();
     radio.printPrettyDetails();
 };

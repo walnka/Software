@@ -110,7 +110,7 @@ class RobotCommunication(object):
             # TODO: Send blank world for testing
             test_world = createWorldProto(createBlankTestingWorld())
             # print(test_world)
-            self.send_world.send_proto(test_world)
+            self.proto_sender.send_proto(test_world)
             time.sleep(1)
 
     def run_primitive_set(self):
@@ -226,7 +226,7 @@ class RobotCommunication(object):
         # TODO: Test Radio
         #self.send_world = WorldProtoRadioSender(0, 1, 0)
         self.proto_sender = ThreadedProtoRadioSender(0);
-        self.proto_sender.register_world_sender(tbots.WORLD_PROTO_RADIO_ADDRESS)
+        self.proto_sender.register_world_sender(WORLD_PROTO_RADIO_ADDRESS)
 
         self.robots_connected_to_fullsystem = {
             robot_id for robot_id in range(MAX_ROBOT_IDS_PER_SIDE)

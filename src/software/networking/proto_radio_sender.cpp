@@ -12,7 +12,7 @@ ProtoRadioSender::ProtoRadioSender(uint8_t channel, int spi_speed) : radio(RF24(
     radio.setAutoAck(false);
     radio.enableDynamicPayloads();
     radio.stopListening();
-    radio.printPrettyDetails();
+    // radio.enableDynamicAck();
 };
 
 ProtoRadioSender::~ProtoRadioSender() {
@@ -28,6 +28,8 @@ void ProtoRadioSender::send(uint8_t address[RADIO_ADDR_LENGTH], std::string data
     }
 
     radio.openWritingPipe(address);
+    radio.printPrettyDetails();
+    std::cout << "Writing Address: " << std::hex << (unsigned long) *address << std::endl;
     uint8_t num_packets = static_cast<uint8_t>(data.length() / RADIO_PACKET_PAYLOAD_SIZE);
     uint8_t data_offset = static_cast<uint8_t>(static_cast<int>(data.length()) % RADIO_PACKET_PAYLOAD_SIZE);
     const char* data_ptr = data.data();
