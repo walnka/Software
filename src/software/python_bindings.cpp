@@ -30,7 +30,6 @@
 #include "software/geom/vector.h"
 #include "software/networking/threaded_proto_udp_listener.hpp"
 #include "software/networking/threaded_proto_udp_sender.hpp"
-#include "software/networking/proto_radio_sender.hpp" // remove
 #include "software/networking/threaded_proto_radio_sender.hpp"
 #include "software/networking/threaded_proto_radio_listener.hpp"
 #include "software/uart/boost_uart_communication.h"
@@ -98,8 +97,7 @@ void declareThreadedProtoUdpListener(py::module& m, std::string name)
 template <typename T>
 void declareThreadedProtoRadioSender(py::class_<ThreadedProtoRadioSender> &pyclass)
 {
-    pyclass.def("send_proto", &ThreadedProtoRadioSender::sendProto<T>)
-           .def("register_sender", &ThreadedProtoRadioSender::registerSender<T>);
+    pyclass.def("send_proto", &ThreadedProtoRadioSender::sendProto<T>);
 }
 
 //template <typename T>
@@ -376,10 +374,13 @@ PYBIND11_MODULE(python_bindings, m)
     // Senders
     declareThreadedProtoUdpSender<TbotsProto::World>(m, "World");
     declareThreadedProtoUdpSender<TbotsProto::RobotStatus>(m, "RobotStatus");
+    declareThreadedProtoUdpSender<TbotsProto::PrimitiveSet>(m, "PrimitiveSet");
 
-    threaded_proto_radio_sender_class = py::class_<ThreadedProtoRadioSender>(m, "ThreadedProtoRadioSender")
+    auto threaded_proto_radio_sender_class = py::class_<ThreadedProtoRadioSender>(m, "ThreadedProtoRadioSender")
         .def(py::init<uint8_t>())
-    
+        .def("register_world_sender", &ThreadedProtoRadioSender::registerSender<TbotsProto::World>)
+        .def("register_primitive_set_sender", &ThreadedProtoRadioSender::registerSender<TbotsProto::PrimitiveSet>);
+
     declareThreadedProtoRadioSender<TbotsProto::World>(threaded_proto_radio_sender_class);
     declareThreadedProtoRadioSender<TbotsProto::PrimitiveSet>(threaded_proto_radio_sender_class);
 

@@ -3,12 +3,15 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "proto_radio_sender",
     hdrs = [
-        "proto_radio_sender.hpp",
+        "proto_radio_sender.h",
+    ],
+    srcs = [
+        "proto_radio_sender.cpp",
     ],
     visibility = ["//visibility:private"],
     deps = [
+        "//software/logger",
         "@RF24",
-        "@RF24Network",
         "//software:constants"
     ],
 )
@@ -16,12 +19,15 @@ cc_library(
 cc_library(
     name = "proto_radio_listener",
     hdrs = [
-        "proto_radio_listener.hpp",
+        "proto_radio_listener.h",
+    ],
+    srcs = [
+        "proto_radio_listener.cpp",
     ],
     visibility = ["//visibility:private"],
     deps = [
+        "//software/logger",
         "@RF24",
-        "@RF24Network",
         "//software:constants"
     ],
 )
@@ -151,6 +157,9 @@ cc_library(
     hdrs = [
         "threaded_proto_radio_listener.hpp",
     ],
+    srcs = [
+        "threaded_proto_radio_listener.cpp",
+    ],
     deps = [
         ":proto_radio_listener",
         "@boost//:asio",
@@ -162,6 +171,9 @@ cc_library(
     name = "threaded_proto_radio_sender",
     hdrs = [
         "threaded_proto_radio_sender.hpp",
+    ],
+    srcs = [
+        "threaded_proto_radio_sender.cpp",
     ],
     deps = [
         ":proto_radio_sender",

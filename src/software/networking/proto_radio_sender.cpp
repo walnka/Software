@@ -1,27 +1,4 @@
-#pragma once
-
-#include <RF24/RF24.h>
-#include <RF24Network/RF24Network.h>
-#include <cstdint>
-#include "software/logger/logger.h"
-#include "software/constants.h"
-
-class ProtoRadioSender
-{
-public:
-    ProtoRadioSender(uint8_t channel, int spi_speed);
-    virtual ~ProtoRadioSender();
-
-    virtual void send(uint8_t address[RADIO_ADDR_LENGTH], std::string data);
-
-private:
-    RF24 radio;
-    // Buffer to hold serialized protobuf data
-    uint8_t data_buffer[RADIO_PACKET_SIZE];
-
-    static const uint8_t CE_PIN = 2; // SPI Chip Enable pin
-    static const uint8_t CSN_PIN = 0; // SPI Chip Select pin
-};
+#include "software/networking/proto_radio_sender.h"
 
 ProtoRadioSender::ProtoRadioSender(uint8_t channel, int spi_speed) : radio(RF24(CE_PIN, CSN_PIN, spi_speed))
 {

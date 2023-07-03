@@ -4,7 +4,7 @@
 #include <boost/bind.hpp>
 #include <string>
 
-#include "software/networking/proto_radio_sender.hpp"
+#include "software/networking/proto_radio_sender.h"
 #include "shared/constants.h"
 
 class ThreadedProtoRadioSender
@@ -47,7 +47,7 @@ private:
     int num_open_writers;
     int current_write_index;
     std::map<std::string, int> protobuf_to_write_index;
-    std::map<int, uint8_t[5]> write_index_to_address;
+    std::map<int, const uint8_t*> write_index_to_address;
     std::map<int, std::string> write_index_to_data;
     bool data_available[RADIO_MAX_PROTO_TYPES];
     std::mutex data_mutex[RADIO_MAX_PROTO_TYPES];
@@ -55,61 +55,19 @@ private:
     static const unsigned int POLL_INTERVAL_MS = 100;
 };
 
-ThreadedProtoRadioSender::ThreadedProtoRadioSender(uint8_t channel, int spi_speed)
-                                                             : radio_sender(channel, spi_speed),
-                                                               num_open_writers(0),
-                                                               current_write_index(0),
-                                                               data_available{}
-{
-    radio_sender_thread = std::thread([this]() {
-        for(;;) {
-            std::unique_lock lock(radio_mutex);
-            while(!data_available)
-            {
-                radio_cv.wait(lock);
-            }
-            for (int i = 0; i < num_open_writers; ++i)
-            {
-                flushPipe();
-            }
-            lock.unlock();
-            usleep(POLL_INTERVAL_MS * MICROSECONDS_PER_MILLISECOND);
-        }
-    });
-}
-
-ThreadedProtoRadioSender::~ThreadedProtoRadioSender()
-{
-    radio_sender_thread.join();
-}
-
-void ThreadedProtoRadioSender::flushPipe()
-{
-    if (!data_available[current_write_index])
-    {
-        current_write_index = (current_write_index + 1) % num_open_writers;
-        return;
-    }
-
-    radio_sender.send(write_index_to_address[current_write_index], write_index_to_data[current_write_index]);
-    data_available[current_write_index] = false;
-
-    current_write_index = (current_write_index + 1) % num_open_writers;
-}
-
 template <class SendProtoT>
 void ThreadedProtoRadioSender::sendProto(const SendProtoT &message)
 {
     std::string proto_type = message.GetDescriptor()->full_name();
-    if (!protobuf_to_write_index.contains(proto_type))
+    if (protobuf_to_write_index.find(proto_type) == protobuf_to_write_index.end())
     {
         LOG(WARNING) << proto_type << " is not registered with ThreadedProtoRadioSender";
         return;
     }
 
     int index = protobuf_to_write_index[proto_type];
-    std::mutex m = data_mutex[index];
-    std::unique_lock data_lock(m);
+    std::mutex *m = &data_mutex[index];
+    std::unique_lock data_lock(*m);
     message.SerializeToString(&write_index_to_data[index]);
     data_lock.unlock();
 
@@ -127,6 +85,7 @@ void ThreadedProtoRadioSender::registerSender(const uint8_t address[RADIO_ADDR_L
     if (num_open_writers >= RADIO_MAX_PROTO_TYPES)
     {
         LOG(WARNING) << "[ThreadedProtoRadioSender] Cannot send more than " << RADIO_MAX_PROTO_TYPES << " different proto types. Cannot register " << proto_type;
+        return;
     }
 
     std::unique_lock radio_lock(radio_mutex);

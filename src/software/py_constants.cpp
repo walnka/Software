@@ -129,4 +129,8 @@ PYBIND11_MODULE(py_constants, m)
 
     // Robot Communication
     m.attr("NUM_TIMES_SEND_STOP") = NUM_TIMES_SEND_STOP;
+
+    // Radio
+    m.attr("WORLD_PROTO_RADIO_ADDRESS") = WORLD_PROTO_RADIO_ADDRESS;
+    m.attr("PRIMITIVE_SET_RADIO_ADDRESS") = WORLD_PROTO_RADIO_ADDRESS;
 }

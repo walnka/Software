@@ -1,6 +1,6 @@
 #pragma once
 
-#include "software/networking/proto_radio_listener.hpp"
+#include "software/networking/proto_radio_listener.h"
 #include "shared/constants.h"
 
 #include <thread>
@@ -25,20 +25,6 @@ private:
     ProtoRadioListener radio_listener;
 };
 
-ThreadedProtoRadioListener::ThreadedProtoRadioListener(uint8_t channel, int spi_speed)
-    : radio_listener(channel, spi_speed)
-{
-    // start the thread to run the io_service in the background
-    std::cout << "starting radio listener thread" << std::endl;
-    radio_listener_thread = std::thread([this]() {
-        for (;;) {
-            radio_listener.receive();
-            usleep(POLL_INTERVAL_MS * MICROSECONDS_PER_MILLISECOND);
-        }
-    });
-}
-
-
 template <class ReceiveProtoT>
 void ThreadedProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback)
 {
@@ -57,9 +43,3 @@ void ThreadedProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_
     }
     callback(packet_data);
 }
-
-ThreadedProtoRadioListener::~ThreadedProtoRadioListener()
-{
-    radio_listener_thread.join();
-}
-
