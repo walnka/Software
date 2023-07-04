@@ -15,13 +15,13 @@ public:
     virtual ~ProtoRadioListener();
     void receive();
     
-    void registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(std::string)> callback);
+    void registerListener(const uint8_t addr, std::function<void(std::string)> callback);
 private:
 
     bool isPacketInvalid(uint8_t rcvd_pipe, uint8_t buf_length) const;
     void handleDataReception(uint8_t received_pipe, uint8_t buf_length);
 
-    static const uint8_t CE_PIN = 50;
+    static const uint8_t CE_PIN = 77;
     static const uint8_t CSN_PIN = 11;
     RF24 radio;
 

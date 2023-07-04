@@ -21,7 +21,6 @@ SIM_TICK_RATE_MS = 16
 ###########################################################################
 
 if __name__ == "__main__":
-
     # Setup parser
     parser = argparse.ArgumentParser(
         description="Thunderscope: Run with no arguments to run AI vs AI"

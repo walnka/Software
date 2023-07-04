@@ -18,10 +18,9 @@ ProtoRadioListener::ProtoRadioListener(uint8_t channel, int spi_speed)
     radio.setPALevel(RF24_PA_MIN);
     radio.setAutoAck(false);
     radio.enableDynamicPayloads();
-    //radio.enableDynamicAck();
+    radio.enableDynamicAck();
     
     radio.startListening();
-    radio.printPrettyDetails();
 };
 
 ProtoRadioListener::~ProtoRadioListener() {
@@ -33,11 +32,15 @@ void ProtoRadioListener::receive() {
     if (radio.available(&pipe)) {
         uint8_t bytes = radio.getDynamicPayloadSize();
         radio.read(&data_buffer, bytes);
+        std::cout << "Recieved data on pipe: " << (int) pipe << "Data: " << data_buffer << std::endl;
         handleDataReception(pipe, bytes);
+    }
+    else {
+      //std::cout << "No Radio Available" << std::endl;
     }
 }
 
-void ProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(std::string)> callback)
+void ProtoRadioListener::registerListener(const uint8_t addr, std::function<void(std::string)> callback)
 {
     auto pipe_it = std::find(std::begin(valid_pipes), std::end(valid_pipes), false);
     if (pipe_it == std::end(valid_pipes))
@@ -48,6 +51,8 @@ void ProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_LENGTH],
     std::size_t pipe_index = std::distance(std::begin(valid_pipes), pipe_it);
     valid_pipes[pipe_index] = true;
     pipe_to_callback[pipe_index] = callback;
+    radio.openReadingPipe(static_cast<uint8_t>(pipe_index), addr);
+    radio.printPrettyDetails();
 }
 
 void ProtoRadioListener::handleDataReception(uint8_t received_pipe, uint8_t buf_length)
@@ -69,6 +74,7 @@ void ProtoRadioListener::handleDataReception(uint8_t received_pipe, uint8_t buf_
     {
         is_currently_reading = true;
         currently_reading_pipe = received_pipe;
+        next_expected_packet_sequence_num = 0;
         expected_num_packets = data_buffer[RADIO_PACKET_LENGTH_INDEX];
         expected_offset = data_buffer[RADIO_PACKET_OFFSET_INDEX];
         assembled_data.clear();
@@ -78,6 +84,7 @@ void ProtoRadioListener::handleDataReception(uint8_t received_pipe, uint8_t buf_
 
     if (data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] == expected_num_packets)
     {
+        LOG(WARNING) << "Packet transfer succeeded!";
         pipe_to_callback[currently_reading_pipe](assembled_data.str());
     }
 
@@ -86,6 +93,15 @@ void ProtoRadioListener::handleDataReception(uint8_t received_pipe, uint8_t buf_
 
 bool ProtoRadioListener::isPacketInvalid(uint8_t rcvd_pipe, uint8_t buf_length) const
 {
+    LOG(INFO) << "is_currently_reading: " << (int) is_currently_reading;
+    LOG(INFO) << "currently_reading_pipe: " << (int) currently_reading_pipe; 
+    LOG(INFO) << "rcvd_pipe: " << (int) rcvd_pipe; 
+    LOG(INFO) << "SEQUENCE_NUMBER on PACKET: " << (int) data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX];
+    LOG(INFO) << "next expected sequence number: " << (int) next_expected_packet_sequence_num;
+    LOG(INFO) << "PACKET_OFFSET_INDEX on packet: " << (int) data_buffer[RADIO_PACKET_OFFSET_INDEX];
+    LOG(INFO) << "PACKETOFFSETLENGTH on packet: " << (int) data_buffer[RADIO_PACKET_LENGTH_INDEX];
+    LOG(INFO) << "expected offset: " << (int) expected_offset;;
+    LOG(INFO) << "expected num packets: " << (int) expected_num_packets;
     return (is_currently_reading && rcvd_pipe != currently_reading_pipe)
         || (!is_currently_reading && data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] != 0)
         || (is_currently_reading && data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] != next_expected_packet_sequence_num)

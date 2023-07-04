@@ -51,7 +51,7 @@ Thunderloop::Thunderloop(const RobotConstants_t& robot_constants, const int loop
     //  multicast_level=1,
     //  address=1
     std::cout << "Initializing Radio Service" << std::endl;
-    radio_service_ = std::make_unique<RadioService>(0);
+    radio_service_ = std::make_unique<RadioService>(65);
 
     std::cout << "Radio Service initialized" << std::endl;
 //

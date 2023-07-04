@@ -15,7 +15,7 @@ public:
     ~ThreadedProtoRadioListener();
 
     template <class ReceiveProtoT>
-    void registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback);
+    void registerListener(const uint8_t addr, std::function<void(ReceiveProtoT)> callback);
 private:
     // The thread running the io_service in the background. This thread will run for the
     // entire lifetime of the class
@@ -26,7 +26,7 @@ private:
 };
 
 template <class ReceiveProtoT>
-void ThreadedProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_LENGTH], std::function<void(ReceiveProtoT)> callback)
+void ThreadedProtoRadioListener::registerListener(const uint8_t addr, std::function<void(ReceiveProtoT)> callback)
 {
     radio_listener.registerListener(addr, 
             [&](std::string raw_byte_data)
@@ -39,7 +39,7 @@ void ThreadedProtoRadioListener::registerListener(const uint8_t addr[RADIO_ADDR_
                 }
                 else
                 {
-                    LOG(INFO) << "ReceivedProtoT debug string: " << packet_data.DebugString();
+                    LOG(WARNING) << "ReceivedProtoT debug string ";
                 }
                 
                 callback(packet_data);

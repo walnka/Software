@@ -225,7 +225,7 @@ class RobotCommunication(object):
 
         # TODO: Test Radio
         #self.send_world = WorldProtoRadioSender(0, 1, 0)
-        self.proto_sender = ThreadedProtoRadioSender(0);
+        self.proto_sender = ThreadedProtoRadioSender(65);
         self.proto_sender.register_world_sender(WORLD_PROTO_RADIO_ADDRESS)
 
         self.robots_connected_to_fullsystem = {

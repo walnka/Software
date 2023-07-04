@@ -63,8 +63,11 @@ static constexpr unsigned int RADIO_HEADER_SIZE = 3;
 static constexpr long unsigned int RADIO_PACKET_PAYLOAD_SIZE = RADIO_PACKET_SIZE - RADIO_HEADER_SIZE;
 static constexpr unsigned int RADIO_ADDR_LENGTH = 5;
 
-static constexpr uint8_t WORLD_PROTO_RADIO_ADDRESS[RADIO_ADDR_LENGTH] = { 0x2, 0x0, 0x0, 0x0, 0x0 };
-static constexpr uint8_t PRIMITIVE_SET_RADIO_ADDRESS[RADIO_ADDR_LENGTH] = { 0x1, 0x0, 0x0, 0x0, 0x0 };
+//static constexpr uint8_t WORLD_PROTO_RADIO_ADDRESS[RADIO_ADDR_LENGTH] = { 0x2, 0x0, 0x0, 0x0, 0x0 };
+//static constexpr uint8_t PRIMITIVE_SET_RADIO_ADDRESS[RADIO_ADDR_LENGTH] = { 0x1, 0x0, 0x0, 0x0, 0x0 };
+
+static constexpr uint8_t WORLD_PROTO_RADIO_ADDRESS = 0x2;
+static constexpr uint8_t PRIMITIVE_SET_RADIO_ADDRESS = 0x1;
 
 static constexpr uint8_t RADIO_PACKET_LENGTH_INDEX = 0;
 static constexpr uint8_t RADIO_PACKET_OFFSET_INDEX = 1;

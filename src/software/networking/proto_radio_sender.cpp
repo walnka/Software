@@ -9,16 +9,16 @@ ProtoRadioSender::ProtoRadioSender(uint8_t channel, int spi_speed) : radio(RF24(
 
     radio.setChannel(channel);
     radio.setPALevel(RF24_PA_MIN);
-    radio.setAutoAck(false);
     radio.enableDynamicPayloads();
+    radio.setAutoAck(false);
+    radio.enableDynamicAck();
     radio.stopListening();
-    // radio.enableDynamicAck();
 };
 
 ProtoRadioSender::~ProtoRadioSender() {
 }
 
-void ProtoRadioSender::send(uint8_t address[RADIO_ADDR_LENGTH], std::string data)
+void ProtoRadioSender::send(uint8_t address, std::string data)
 {
     long unsigned int max_size = std::pow(2, sizeof(uint8_t)*8)*(1+RADIO_PACKET_PAYLOAD_SIZE);
     if (data.length() > max_size)
@@ -29,8 +29,9 @@ void ProtoRadioSender::send(uint8_t address[RADIO_ADDR_LENGTH], std::string data
 
     radio.openWritingPipe(address);
     radio.printPrettyDetails();
-    std::cout << "Writing Address: " << std::hex << (unsigned long) *address << std::endl;
+    std::cout << "Writing Address: " << std::hex << (unsigned long) address << std::endl;
     uint8_t num_packets = static_cast<uint8_t>(data.length() / RADIO_PACKET_PAYLOAD_SIZE);
+    std::cout << "num_packets: " << (int) num_packets << std::endl;
     uint8_t data_offset = static_cast<uint8_t>(static_cast<int>(data.length()) % RADIO_PACKET_PAYLOAD_SIZE);
     const char* data_ptr = data.data();
     for (uint8_t packet_index = 0; packet_index < num_packets; ++packet_index)
@@ -47,6 +48,7 @@ void ProtoRadioSender::send(uint8_t address[RADIO_ADDR_LENGTH], std::string data
             LOG(WARNING) << "[ProtoRadioSender] Unable to send packet to address " << (unsigned long) address;
             return;
         }
+        std::cout << "Data packet sent" << std::endl;
     }
     data_buffer[RADIO_PACKET_LENGTH_INDEX] = num_packets;
     data_buffer[RADIO_PACKET_OFFSET_INDEX] = data_offset;

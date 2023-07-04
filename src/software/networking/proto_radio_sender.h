@@ -11,7 +11,7 @@ public:
     ProtoRadioSender(uint8_t channel, int spi_speed);
     virtual ~ProtoRadioSender();
 
-    virtual void send(uint8_t address[RADIO_ADDR_LENGTH], std::string data);
+    virtual void send(uint8_t address, std::string data);
 
 private:
     RF24 radio;
