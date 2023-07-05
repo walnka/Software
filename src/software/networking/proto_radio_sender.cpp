@@ -49,6 +49,7 @@ void ProtoRadioSender::send(uint8_t address, std::string data)
             return;
         }
         std::cout << "Data packet sent" << std::endl;
+        usleep(10 * MICROSECONDS_PER_MILLISECOND);
     }
     data_buffer[RADIO_PACKET_LENGTH_INDEX] = num_packets;
     data_buffer[RADIO_PACKET_OFFSET_INDEX] = data_offset;

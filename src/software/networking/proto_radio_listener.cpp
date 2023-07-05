@@ -93,14 +93,14 @@ void ProtoRadioListener::handleDataReception(uint8_t received_pipe, uint8_t buf_
 
 bool ProtoRadioListener::isPacketInvalid(uint8_t rcvd_pipe, uint8_t buf_length) const
 {
-    LOG(INFO) << "is_currently_reading: " << (int) is_currently_reading;
-    LOG(INFO) << "currently_reading_pipe: " << (int) currently_reading_pipe; 
-    LOG(INFO) << "rcvd_pipe: " << (int) rcvd_pipe; 
+    // LOG(INFO) << "is_currently_reading: " << (int) is_currently_reading;
+    // LOG(INFO) << "currently_reading_pipe: " << (int) currently_reading_pipe; 
+    // LOG(INFO) << "rcvd_pipe: " << (int) rcvd_pipe; 
     LOG(INFO) << "SEQUENCE_NUMBER on PACKET: " << (int) data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX];
     LOG(INFO) << "next expected sequence number: " << (int) next_expected_packet_sequence_num;
-    LOG(INFO) << "PACKET_OFFSET_INDEX on packet: " << (int) data_buffer[RADIO_PACKET_OFFSET_INDEX];
-    LOG(INFO) << "PACKETOFFSETLENGTH on packet: " << (int) data_buffer[RADIO_PACKET_LENGTH_INDEX];
-    LOG(INFO) << "expected offset: " << (int) expected_offset;;
+    // LOG(INFO) << "PACKET_OFFSET_INDEX on packet: " << (int) data_buffer[RADIO_PACKET_OFFSET_INDEX];
+    // LOG(INFO) << "PACKETOFFSETLENGTH on packet: " << (int) data_buffer[RADIO_PACKET_LENGTH_INDEX];
+    // LOG(INFO) << "expected offset: " << (int) expected_offset;;
     LOG(INFO) << "expected num packets: " << (int) expected_num_packets;
     return (is_currently_reading && rcvd_pipe != currently_reading_pipe)
         || (!is_currently_reading && data_buffer[RADIO_PACKET_SEQUENCE_NUM_INDEX] != 0)

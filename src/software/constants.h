@@ -58,7 +58,7 @@ static constexpr unsigned int SSL_VISION_PORT = 10020;
 const std::string SSL_REFEREE_ADDRESS          = "224.5.23.1";
 static constexpr unsigned int SSL_REFEREE_PORT = 10003;
 
-static constexpr unsigned int RADIO_PACKET_SIZE = 22;
+static constexpr unsigned int RADIO_PACKET_SIZE = 12;
 static constexpr unsigned int RADIO_HEADER_SIZE = 3;
 static constexpr long unsigned int RADIO_PACKET_PAYLOAD_SIZE = RADIO_PACKET_SIZE - RADIO_HEADER_SIZE;
 static constexpr unsigned int RADIO_ADDR_LENGTH = 5;
